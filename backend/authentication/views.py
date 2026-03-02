@@ -238,6 +238,37 @@ def register_view(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password_view(request):
+    """
+    Mock forgot password endpoint
+    """
+    email = request.data.get('email')
+    username = request.data.get('username')
+    
+    if not email and not username:
+        return Response({'error': 'Please provide an email or username.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    try:
+        if email:
+            user = User.objects.get(email=email)
+        else:
+            user = User.objects.get(username=username)
+            
+        temp_password = "Temp@12345"
+        user.set_password(temp_password)
+        user.save()
+        
+        return Response({
+            'message': 'Password has been reset successfully.',
+            'temp_password': temp_password,
+            'note': 'In a real production app, this would be sent to your email.'
+        }, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({'error': 'No account found with these details.'}, status=status.HTTP_404_NOT_FOUND)
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def users_list_view(request):

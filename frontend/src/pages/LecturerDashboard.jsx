@@ -5,7 +5,7 @@ import {
     Button, Dialog, DialogTitle, DialogContent, DialogActions,
     TextField, MenuItem, Select, FormControl, InputLabel,
     Chip, CircularProgress, Switch, FormControlLabel,
-    LinearProgress, alpha,
+    LinearProgress, alpha, TableContainer,
 } from '@mui/material';
 import {
     PlayArrow, Stop, Refresh, Download, School,
@@ -208,7 +208,12 @@ function SessionsTab({ courses }) {
         } catch { toast.error('Failed to refresh QR'); }
     };
 
-    const handleCreate = async () => {
+    const handleCreate = async (e) => {
+        if (e) e.preventDefault();
+        if (!form.course || !form.date || !form.start_time || !form.end_time || !form.venue) {
+            toast.error('Please fill in required fields');
+            return;
+        }
         setSaving(true);
         try {
             // Backend expects course_id instead of course object
@@ -248,7 +253,7 @@ function SessionsTab({ courses }) {
                     <Button variant="contained" onClick={() => setOpen(true)}>+ New Session</Button>
                 </Box>
                 {loading ? <CircularProgress /> : (
-                    <Card>
+                    <TableContainer component={Card} sx={{ overflowX: 'auto' }}>
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
@@ -291,30 +296,30 @@ function SessionsTab({ courses }) {
                                 ))}
                             </TableBody>
                         </Table>
-                    </Card>
+                    </TableContainer>
                 )}
             </Grid>
 
-            <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+            <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth component="form" onSubmit={handleCreate}>
                 <DialogTitle>Create New Session</DialogTitle>
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth required>
                         <InputLabel>Course</InputLabel>
                         <Select value={form.course} label="Course" onChange={(e) => setForm((f) => ({ ...f, course: e.target.value }))}>
                             {courses.map((c) => <MenuItem key={c.id} value={c.id}>{c.course_code} – {c.name}</MenuItem>)}
                         </Select>
                     </FormControl>
-                    <TextField label="Date" type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} fullWidth InputLabelProps={{ shrink: true }} />
+                    <TextField label="Date" type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} fullWidth InputLabelProps={{ shrink: true }} required />
                     <Box sx={{ display: 'flex', gap: 2 }}>
-                        <TextField label="Start Time" type="time" value={form.start_time} onChange={(e) => setForm((f) => ({ ...f, start_time: e.target.value }))} fullWidth InputLabelProps={{ shrink: true }} />
-                        <TextField label="End Time" type="time" value={form.end_time} onChange={(e) => setForm((f) => ({ ...f, end_time: e.target.value }))} fullWidth InputLabelProps={{ shrink: true }} />
+                        <TextField label="Start Time" type="time" value={form.start_time} onChange={(e) => setForm((f) => ({ ...f, start_time: e.target.value }))} fullWidth InputLabelProps={{ shrink: true }} required />
+                        <TextField label="End Time" type="time" value={form.end_time} onChange={(e) => setForm((f) => ({ ...f, end_time: e.target.value }))} fullWidth InputLabelProps={{ shrink: true }} required />
                     </Box>
-                    <TextField label="Venue" value={form.venue} onChange={(e) => setForm((f) => ({ ...f, venue: e.target.value }))} fullWidth />
+                    <TextField label="Venue" value={form.venue} onChange={(e) => setForm((f) => ({ ...f, venue: e.target.value }))} fullWidth required />
                     <TextField label="Topic" value={form.topic} onChange={(e) => setForm((f) => ({ ...f, topic: e.target.value }))} fullWidth />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button variant="contained" onClick={handleCreate} disabled={saving}>
+                    <Button variant="contained" type="submit" disabled={saving}>
                         {saving ? <CircularProgress size={18} /> : 'Create'}
                     </Button>
                 </DialogActions>
@@ -383,40 +388,42 @@ function AttendanceTab() {
             </Box>
 
             {selectedSession && !fetchingRecords && (
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell sx={{ fontWeight: 700 }}>Student Name</TableCell>
-                            <TableCell sx={{ fontWeight: 700 }}>Student Number</TableCell>
-                            <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                            <TableCell sx={{ fontWeight: 700 }}>Time Marked</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {records.length > 0 ? (
-                            records.map((r) => (
-                                <TableRow key={r.id} hover>
-                                    <TableCell>{r.student?.first_name} {r.student?.last_name}</TableCell>
-                                    <TableCell>{r.student?.username}</TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={r.status.toUpperCase()}
-                                            size="small"
-                                            color={r.status === 'present' ? 'success' : 'error'}
-                                        />
-                                    </TableCell>
-                                    <TableCell>{new Date(r.marked_at).toLocaleString()}</TableCell>
-                                </TableRow>
-                            ))
-                        ) : (
+                <TableContainer sx={{ overflowX: 'auto' }}>
+                    <Table size="small">
+                        <TableHead>
                             <TableRow>
-                                <TableCell colSpan={4} align="center" sx={{ py: 3, color: 'text.secondary' }}>
-                                    No attendance records found for this session.
-                                </TableCell>
+                                <TableCell sx={{ fontWeight: 700 }}>Student Name</TableCell>
+                                <TableCell sx={{ fontWeight: 700 }}>Student Number</TableCell>
+                                <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                                <TableCell sx={{ fontWeight: 700 }}>Time Marked</TableCell>
                             </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                        </TableHead>
+                        <TableBody>
+                            {records.length > 0 ? (
+                                records.map((r) => (
+                                    <TableRow key={r.id} hover>
+                                        <TableCell>{r.student?.first_name} {r.student?.last_name}</TableCell>
+                                        <TableCell>{r.student?.username}</TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={r.status.toUpperCase()}
+                                                size="small"
+                                                color={r.status === 'present' ? 'success' : 'error'}
+                                            />
+                                        </TableCell>
+                                        <TableCell>{new Date(r.marked_at).toLocaleString()}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                                        No attendance records found for this session.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             )}
 
             {!selectedSession && (
@@ -474,7 +481,7 @@ function AtRiskTab({ courses }) {
                 </Grid>
             </Card>
             {atRisk && (
-                <Card>
+                <TableContainer component={Card} sx={{ overflowX: 'auto' }}>
                     <CardHeader
                         title={`At-Risk Students: ${atRisk.course}`}
                         subheader={`${atRisk.below_threshold} of ${atRisk.total_students} below ${atRisk.threshold}% threshold`}
@@ -509,7 +516,7 @@ function AtRiskTab({ courses }) {
                             )}
                         </TableBody>
                     </Table>
-                </Card>
+                </TableContainer>
             )}
         </Box>
     );
@@ -589,7 +596,7 @@ export default function LecturerDashboard() {
                         } />
                         <Route path="sessions" element={<SessionsTab courses={courses} />} />
                         <Route path="courses" element={
-                            <Card>
+                            <TableContainer component={Card} sx={{ overflowX: 'auto' }}>
                                 <CardHeader title="My Courses" />
                                 <Table>
                                     <TableHead>
@@ -610,7 +617,7 @@ export default function LecturerDashboard() {
                                         ))}
                                     </TableBody>
                                 </Table>
-                            </Card>
+                            </TableContainer>
                         } />
                         <Route path="attendance" element={<AttendanceTab />} />
                         <Route path="at-risk" element={<AtRiskTab courses={courses} />} />

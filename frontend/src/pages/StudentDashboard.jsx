@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
     Box, Grid, Typography, Card, CardContent, CardHeader,
     Tab, Tabs, Table, TableHead, TableRow, TableCell, TableBody,
-    Button, Chip, CircularProgress, alpha, LinearProgress,
+    Button, Chip, CircularProgress, alpha, LinearProgress, TableContainer,
 } from '@mui/material';
 import {
     QrCodeScanner, CheckCircle, Assignment, School,
@@ -115,7 +115,7 @@ function HistoryTab() {
     if (loading) return <CircularProgress />;
 
     return (
-        <Card>
+        <TableContainer component={Card} sx={{ overflowX: 'auto' }}>
             <Table>
                 <TableHead>
                     <TableRow>
@@ -147,7 +147,7 @@ function HistoryTab() {
                     )}
                 </TableBody>
             </Table>
-        </Card>
+        </TableContainer>
     );
 }
 

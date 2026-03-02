@@ -2,23 +2,36 @@ import { useState } from 'react';
 import {
     Box, Card, CardContent, Typography, TextField, Button,
     InputAdornment, IconButton, CircularProgress, alpha,
+    Tabs, Tab, Select, MenuItem, FormControl, InputLabel,
+    Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
-import { Visibility, VisibilityOff, Lock, Person, School } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Lock, Person, School, Email, Badge } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { authApi } from '../api/client';
 import useAuthStore from '../context/authStore';
 
 export default function LoginPage() {
-    const [form, setForm] = useState({ username: '', password: '' });
+    const [tabIndex, setTabIndex] = useState(0);
+    const [form, setForm] = useState({
+        username: '', password: '',
+        first_name: '', last_name: '', email: '',
+        confirm_password: '', role: 'student',
+        student_number: '', staff_id: ''
+    });
     const [showPass, setShowPass] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    // Forgot password state
+    const [forgotPassOpen, setForgotPassOpen] = useState(false);
+    const [resetInput, setResetInput] = useState('');
+    const [resetting, setResetting] = useState(false);
     const { login } = useAuthStore();
     const navigate = useNavigate();
 
     const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-    const handleSubmit = async (e) => {
+    const handleLoginSubmit = async (e) => {
         e.preventDefault();
         if (!form.username || !form.password) {
             toast.error('Please fill in all fields');
@@ -26,13 +39,11 @@ export default function LoginPage() {
         }
         setLoading(true);
         try {
-            const { data } = await authApi.login(form);
-            // Set tokens first so subsequent API calls (like me()) have the Authorization header
+            const { data } = await authApi.login({ username: form.username, password: form.password });
             useAuthStore.getState().setTokens(data.access, data.refresh);
             const meRes = await authApi.me();
             login(meRes.data, data.access, data.refresh);
             toast.success(`Welcome back, ${meRes.data.first_name}!`);
-            // Redirect by role
             if (meRes.data.role === 'admin') navigate('/admin');
             else if (meRes.data.role === 'lecturer') navigate('/lecturer');
             else navigate('/student');
@@ -40,6 +51,73 @@ export default function LoginPage() {
             toast.error(err.response?.data?.detail || 'Invalid credentials. Please try again.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRegisterSubmit = async (e) => {
+        e.preventDefault();
+        if (!form.username || !form.password || !form.email || !form.first_name || !form.last_name) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+        if (form.password !== form.confirm_password) {
+            toast.error('Passwords do not match');
+            return;
+        }
+        setLoading(true);
+        try {
+            const registerData = {
+                username: form.username,
+                email: form.email,
+                first_name: form.first_name,
+                last_name: form.last_name,
+                password: form.password,
+                confirm_password: form.confirm_password,
+                role: form.role,
+                ...(form.role === 'student' ? { student_number: form.student_number } : {}),
+                ...(form.role === 'lecturer' ? { staff_id: form.staff_id } : {}),
+            };
+            const { data } = await authApi.register(registerData);
+            useAuthStore.getState().setTokens(data.access, data.refresh);
+            const meRes = await authApi.me();
+            login(meRes.data, data.access, data.refresh);
+            toast.success('Registration successful!');
+            if (meRes.data.role === 'admin') navigate('/admin');
+            else if (meRes.data.role === 'lecturer') navigate('/lecturer');
+            else navigate('/student');
+        } catch (err) {
+            const errs = err.response?.data;
+            const firstErr = errs ? Object.values(errs)[0][0] : 'Registration failed';
+            toast.error(typeof firstErr === 'string' ? firstErr : 'Registration failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        if (e) e.preventDefault();
+        if (!resetInput) {
+            toast.error('Please enter your email or username');
+            return;
+        }
+        setResetting(true);
+        try {
+            // Send either username or email based on format
+            const payload = resetInput.includes('@')
+                ? { email: resetInput }
+                : { username: resetInput };
+
+            const { data } = await authApi.resetPassword(payload);
+            toast.success(
+                `${data.message} Your new temporary password is: ${data.temp_password}`,
+                { duration: 6000 }
+            );
+            setForgotPassOpen(false);
+            setResetInput('');
+        } catch (err) {
+            toast.error(err.response?.data?.error || 'Failed to reset password');
+        } finally {
+            setResetting(false);
         }
     };
 
@@ -78,7 +156,7 @@ export default function LoginPage() {
         >
             <Card
                 sx={{
-                    maxWidth: 420,
+                    maxWidth: tabIndex === 0 ? 420 : 500,
                     width: '100%',
                     p: 2,
                     background: 'rgba(19,25,41,0.9)',
@@ -86,11 +164,12 @@ export default function LoginPage() {
                     border: '1px solid rgba(255,255,255,0.08)',
                     position: 'relative',
                     zIndex: 1,
+                    transition: 'max-width 0.3s ease'
                 }}
             >
                 <CardContent>
                     {/* Logo & Title */}
-                    <Box sx={{ textAlign: 'center', mb: 4 }}>
+                    <Box sx={{ textAlign: 'center', mb: 3 }}>
                         <Box
                             sx={{
                                 width: 64, height: 64, borderRadius: '16px',
@@ -110,57 +189,146 @@ export default function LoginPage() {
                         </Typography>
                     </Box>
 
-                    {/* Form */}
-                    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <TextField
-                            label="Username"
-                            name="username"
-                            value={form.username}
-                            onChange={handleChange}
-                            fullWidth
-                            autoComplete="username"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Person sx={{ color: 'text.secondary', fontSize: 20 }} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                        <TextField
-                            label="Password"
-                            name="password"
-                            type={showPass ? 'text' : 'password'}
-                            value={form.password}
-                            onChange={handleChange}
-                            fullWidth
-                            autoComplete="current-password"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Lock sx={{ color: 'text.secondary', fontSize: 20 }} />
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton size="small" onClick={() => setShowPass((s) => !s)} edge="end">
-                                            {showPass ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            fullWidth
-                            size="large"
-                            disabled={loading}
-                            sx={{ mt: 1, py: 1.5 }}
-                        >
-                            {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
-                        </Button>
-                    </Box>
+                    <Tabs
+                        value={tabIndex}
+                        onChange={(e, val) => setTabIndex(val)}
+                        centered
+                        sx={{ mb: 3 }}
+                    >
+                        <Tab label="Sign In" />
+                        <Tab label="Register" />
+                    </Tabs>
+
+                    {tabIndex === 0 ? (
+                        /* Login Form */
+                        <Box component="form" onSubmit={handleLoginSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <TextField
+                                label="Username"
+                                name="username"
+                                value={form.username}
+                                onChange={handleChange}
+                                fullWidth
+                                required
+                                autoComplete="username"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <Person sx={{ color: 'text.secondary', fontSize: 20 }} />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                            <TextField
+                                label="Password"
+                                name="password"
+                                type={showPass ? 'text' : 'password'}
+                                value={form.password}
+                                onChange={handleChange}
+                                fullWidth
+                                required
+                                autoComplete="current-password"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <Lock sx={{ color: 'text.secondary', fontSize: 20 }} />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton size="small" onClick={() => setShowPass((s) => !s)} edge="end">
+                                                {showPass ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                fullWidth
+                                size="large"
+                                disabled={loading}
+                                sx={{ mt: 1, py: 1.5 }}
+                            >
+                                {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
+                            </Button>
+
+                            <Box sx={{ textAlign: 'center', mt: 1 }}>
+                                <Button
+                                    color="primary"
+                                    onClick={() => setForgotPassOpen(true)}
+                                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                                >
+                                    Forgot Password?
+                                </Button>
+                            </Box>
+                        </Box>
+                    ) : (
+                        /* Register Form */
+                        <Box component="form" onSubmit={handleRegisterSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                                <TextField label="First Name" name="first_name" value={form.first_name} onChange={handleChange} fullWidth required />
+                                <TextField label="Last Name" name="last_name" value={form.last_name} onChange={handleChange} fullWidth required />
+                            </Box>
+
+                            <TextField
+                                label="Username" name="username" value={form.username} onChange={handleChange} fullWidth required
+                                InputProps={{ startAdornment: <InputAdornment position="start"><Person fontSize="small" /></InputAdornment> }}
+                            />
+
+                            <TextField
+                                label="Email" name="email" type="email" value={form.email} onChange={handleChange} fullWidth required
+                                InputProps={{ startAdornment: <InputAdornment position="start"><Email fontSize="small" /></InputAdornment> }}
+                            />
+
+                            <FormControl fullWidth required>
+                                <InputLabel>Register As</InputLabel>
+                                <Select name="role" value={form.role} label="Register As" onChange={handleChange}>
+                                    <MenuItem value="student">Student</MenuItem>
+                                    <MenuItem value="lecturer">Lecturer</MenuItem>
+                                </Select>
+                            </FormControl>
+
+                            {form.role === 'student' && (
+                                <TextField
+                                    label="Student Number" name="student_number" value={form.student_number} onChange={handleChange} fullWidth required
+                                    InputProps={{ startAdornment: <InputAdornment position="start"><Badge fontSize="small" /></InputAdornment> }}
+                                />
+                            )}
+
+                            {form.role === 'lecturer' && (
+                                <TextField
+                                    label="Staff ID" name="staff_id" value={form.staff_id} onChange={handleChange} fullWidth required
+                                    InputProps={{ startAdornment: <InputAdornment position="start"><Badge fontSize="small" /></InputAdornment> }}
+                                />
+                            )}
+
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                                <TextField
+                                    label="Password" name="password" type={showPass ? 'text' : 'password'} value={form.password} onChange={handleChange} fullWidth required
+                                    InputProps={{ startAdornment: <InputAdornment position="start"><Lock fontSize="small" /></InputAdornment> }}
+                                />
+                                <TextField
+                                    label="Confirm Password" name="confirm_password" type={showPass ? 'text' : 'password'} value={form.confirm_password} onChange={handleChange} fullWidth required
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton size="small" onClick={() => setShowPass((s) => !s)} edge="end">
+                                                    {showPass ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Box>
+
+                            <Button
+                                type="submit" variant="contained" fullWidth size="large" disabled={loading} sx={{ mt: 1, py: 1.5 }}
+                            >
+                                {loading ? <CircularProgress size={22} color="inherit" /> : 'Register'}
+                            </Button>
+                        </Box>
+                    )}
 
                     {/* Demo credentials hint */}
                     <Box
@@ -185,6 +353,37 @@ export default function LoginPage() {
                     </Box>
                 </CardContent>
             </Card>
+
+            {/* Forgot Password Dialog */}
+            <Dialog open={forgotPassOpen} onClose={() => setForgotPassOpen(false)} maxWidth="xs" fullWidth component="form" onSubmit={handleResetPassword}>
+                <DialogTitle>Reset Password</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3, pt: 1 }}>
+                        Enter your username or email address and we will reset your password.
+                    </Typography>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Username or Email"
+                        fullWidth
+                        required
+                        variant="outlined"
+                        value={resetInput}
+                        onChange={(e) => setResetInput(e.target.value)}
+                        disabled={resetting}
+                    />
+                </DialogContent>
+                <DialogActions sx={{ pb: 3, px: 3 }}>
+                    <Button onClick={() => setForgotPassOpen(false)} disabled={resetting}>Cancel</Button>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={resetting || !resetInput}
+                    >
+                        {resetting ? <CircularProgress size={20} color="inherit" /> : 'Reset Password'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

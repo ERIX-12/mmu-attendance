@@ -4,7 +4,7 @@ import {
     Tab, Tabs, Table, TableHead, TableRow, TableCell, TableBody,
     Button, Dialog, DialogTitle, DialogContent, DialogActions,
     TextField, MenuItem, Select, FormControl, InputLabel,
-    Chip, IconButton, CircularProgress, alpha,
+    Chip, IconButton, CircularProgress, alpha, TableContainer,
 } from '@mui/material';
 import { Add, School, People, EventNote, Assessment, Download, Delete, Edit, PlayArrow, Stop, QrCode2, CheckCircle, Warning } from '@mui/icons-material';
 import {
@@ -116,7 +116,12 @@ function CoursesTab({ courses, users, onRefresh }) {
         setOpen(true);
     };
 
-    const handleSave = async () => {
+    const handleSave = async (e) => {
+        if (e) e.preventDefault();
+        if (!form.course_code || !form.name || !form.department || !form.lecturer) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
         setSaving(true);
         try {
             const payload = {
@@ -160,7 +165,7 @@ function CoursesTab({ courses, users, onRefresh }) {
                 <Typography variant="h6">All Courses ({courses.length})</Typography>
                 <Button variant="contained" startIcon={<Add />} onClick={handleOpenCreate}>New Course</Button>
             </Box>
-            <Card>
+            <TableContainer component={Card} sx={{ overflowX: 'auto' }}>
                 <Table>
                     <TableHead>
                         <TableRow>
@@ -194,15 +199,15 @@ function CoursesTab({ courses, users, onRefresh }) {
                         ))}
                     </TableBody>
                 </Table>
-            </Card>
-            <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+            </TableContainer>
+            <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth component="form" onSubmit={handleSave}>
                 <DialogTitle>{editingCourse ? 'Edit Course' : 'Create New Course'}</DialogTitle>
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-                    <TextField label="Course Code" value={form.course_code} onChange={(e) => setForm((f) => ({ ...f, course_code: e.target.value }))} fullWidth />
-                    <TextField label="Course Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} fullWidth />
-                    <TextField label="Credits" type="number" value={form.credits} onChange={(e) => setForm((f) => ({ ...f, credits: e.target.value }))} fullWidth />
-                    <TextField label="Department" value={form.department} onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))} fullWidth />
-                    <FormControl fullWidth>
+                    <TextField label="Course Code" value={form.course_code} onChange={(e) => setForm((f) => ({ ...f, course_code: e.target.value }))} fullWidth required />
+                    <TextField label="Course Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} fullWidth required />
+                    <TextField label="Credits" type="number" value={form.credits} onChange={(e) => setForm((f) => ({ ...f, credits: e.target.value }))} fullWidth required />
+                    <TextField label="Department" value={form.department} onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))} fullWidth required />
+                    <FormControl fullWidth required>
                         <InputLabel>Lecturer</InputLabel>
                         <Select value={form.lecturer} label="Lecturer" onChange={(e) => setForm((f) => ({ ...f, lecturer: e.target.value }))}>
                             {lecturers.map((l) => <MenuItem key={l.id} value={l.id}>{l.full_name}</MenuItem>)}
@@ -211,7 +216,7 @@ function CoursesTab({ courses, users, onRefresh }) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSave} disabled={saving}>
+                    <Button variant="contained" type="submit" disabled={saving}>
                         {saving ? <CircularProgress size={18} /> : (editingCourse ? 'Update' : 'Create')}
                     </Button>
                 </DialogActions>
@@ -272,7 +277,16 @@ function UsersTab({ users, onRefresh }) {
         setOpen(true);
     };
 
-    const handleSave = async () => {
+    const handleSave = async (e) => {
+        if (e) e.preventDefault();
+        if (!form.username || !form.email || !form.first_name || !form.last_name || !form.role) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+        if (!editingUser && form.password !== form.confirm_password) {
+            toast.error('Passwords do not match');
+            return;
+        }
         setSaving(true);
         try {
             if (editingUser) {
@@ -354,12 +368,12 @@ function UsersTab({ users, onRefresh }) {
                 <DialogTitle>{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
                     <Box sx={{ display: 'flex', gap: 2 }}>
-                        <TextField label="First Name" value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} fullWidth />
-                        <TextField label="Last Name" value={form.last_name} onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} fullWidth />
+                        <TextField label="First Name" value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} fullWidth required />
+                        <TextField label="Last Name" value={form.last_name} onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} fullWidth required />
                     </Box>
-                    <TextField label="Username" value={form.username} onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))} fullWidth disabled={!!editingUser} />
-                    <TextField label="Email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} fullWidth />
-                    <FormControl fullWidth>
+                    <TextField label="Username" value={form.username} onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))} fullWidth disabled={!!editingUser} required />
+                    <TextField label="Email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} fullWidth required />
+                    <FormControl fullWidth required>
                         <InputLabel>Role</InputLabel>
                         <Select value={form.role} label="Role" onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}>
                             {['admin', 'lecturer', 'student'].map((r) => <MenuItem key={r} value={r}>{r}</MenuItem>)}
@@ -371,7 +385,7 @@ function UsersTab({ users, onRefresh }) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSave} disabled={saving}>
+                    <Button variant="contained" type="submit" disabled={saving}>
                         {saving ? <CircularProgress size={18} /> : (editingUser ? 'Update' : 'Create')}
                     </Button>
                 </DialogActions>
@@ -435,7 +449,7 @@ function AllSessionsTab() {
         <Box>
             <Typography variant="h6" sx={{ mb: 2 }}>All Sessions</Typography>
             {loading ? <CircularProgress /> : (
-                <Card>
+                <TableContainer component={Card} sx={{ overflowX: 'auto' }}>
                     <Table size="small">
                         <TableHead>
                             <TableRow>
@@ -477,7 +491,7 @@ function AllSessionsTab() {
                             ))}
                         </TableBody>
                     </Table>
-                </Card>
+                </TableContainer>
             )}
         </Box>
     );
@@ -539,7 +553,7 @@ function ReportsTab({ courses }) {
                 </Grid>
             </Card>
             {atRisk && (
-                <Card>
+                <TableContainer component={Card} sx={{ overflowX: 'auto' }}>
                     <CardHeader
                         title={`At-Risk Students: ${atRisk.course}`}
                         subheader={`${atRisk.below_threshold} of ${atRisk.total_students} below ${atRisk.threshold}% threshold`}
@@ -566,7 +580,7 @@ function ReportsTab({ courses }) {
                             ))}
                         </TableBody>
                     </Table>
-                </Card>
+                </TableContainer>
             )}
         </Box>
     );
