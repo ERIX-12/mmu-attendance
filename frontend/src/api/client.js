@@ -70,6 +70,7 @@ export const authApi = {
     listUsers: (params) => api.get('/auth/users/', { params }),
     createUser: (data) => api.post('/auth/users/', data),
     updateUser: (id, data) => api.patch(`/auth/users/${id}/`, data),
+    updateMe: (data) => api.patch('/auth/users/me/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
     deleteUser: (id) => api.delete(`/auth/users/${id}/`),
     changePassword: (id, data) => api.post(`/auth/users/${id}/change_password/`, data),
 };

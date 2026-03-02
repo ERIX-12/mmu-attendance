@@ -3,12 +3,13 @@ import {
     Box, Drawer, AppBar, Toolbar, Typography, IconButton,
     List, ListItem, ListItemButton, ListItemIcon, ListItemText,
     Avatar, Menu, MenuItem, Divider, Chip, useMediaQuery,
-    Tooltip, alpha,
+    Tooltip, alpha, Dialog, DialogTitle, DialogContent,
+    DialogActions, Button, TextField, CircularProgress,
 } from '@mui/material';
 import {
     Menu as MenuIcon, Dashboard, School, People, Assignment,
     BarChart, Logout, AccountCircle, QrCode, EventNote,
-    CheckCircle, Warning, Assessment,
+    CheckCircle, Warning, Assessment, Settings as SettingsIcon, CameraAlt,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
@@ -64,6 +65,55 @@ export default function Layout({ children }) {
         toast.success('Logged out successfully');
     };
 
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [settingsForm, setSettingsForm] = useState({ first_name: '', last_name: '', email: '', department: '' });
+    const [profileImg, setProfileImg] = useState(null);
+    const [profileImgFile, setProfileImgFile] = useState(null);
+    const [savingSettings, setSavingSettings] = useState(false);
+
+    const openSettings = () => {
+        setSettingsForm({
+            first_name: user?.first_name || '',
+            last_name: user?.last_name || '',
+            email: user?.email || '',
+            department: user?.department || '',
+        });
+        setProfileImg(user?.profile_picture || null);
+        setProfileImgFile(null);
+        setSettingsOpen(true);
+    };
+
+    const handleSettingsSave = async (e) => {
+        e.preventDefault();
+        setSavingSettings(true);
+        const formData = new FormData();
+        formData.append('first_name', settingsForm.first_name);
+        formData.append('last_name', settingsForm.last_name);
+        formData.append('email', settingsForm.email);
+        formData.append('department', settingsForm.department);
+        if (profileImgFile) {
+            formData.append('profile_picture', profileImgFile);
+        }
+
+        try {
+            const { data } = await authApi.updateMe(formData);
+            toast.success(data.message || 'Profile updated');
+            useAuthStore.getState().login(data.user, useAuthStore.getState().accessToken, refreshToken);
+            setSettingsOpen(false);
+        } catch (err) {
+            toast.error('Failed to update profile');
+        } finally {
+            setSavingSettings(false);
+        }
+    };
+
+    const handleImgChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setProfileImgFile(e.target.files[0]);
+            setProfileImg(URL.createObjectURL(e.target.files[0]));
+        }
+    };
+
     const drawerContent = (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 2 }}>
             {/* Logo */}
@@ -117,8 +167,8 @@ export default function Layout({ children }) {
             {/* User info */}
             <Box sx={{ px: 1, py: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Avatar sx={{ width: 36, height: 36, bgcolor: theme.palette.primary.dark, fontSize: 14 }}>
-                        {user?.first_name?.[0]}{user?.last_name?.[0]}
+                    <Avatar src={user?.profile_picture} sx={{ width: 36, height: 36, bgcolor: theme.palette.primary.dark, fontSize: 14 }}>
+                        {!user?.profile_picture && `${user?.first_name?.[0] || ''}${user?.last_name?.[0] || ''}`}
                     </Avatar>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Typography variant="body2" sx={{ fontWeight: 600, truncate: true }} noWrap>
@@ -131,6 +181,13 @@ export default function Layout({ children }) {
                             sx={{ height: 18, fontSize: '0.65rem', mt: 0.25 }}
                         />
                     </Box>
+                    {user?.role === 'admin' && (
+                        <Tooltip title="Settings">
+                            <IconButton size="small" onClick={openSettings} color="primary">
+                                <SettingsIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    )}
                     <Tooltip title="Logout">
                         <IconButton size="small" onClick={handleLogout} color="error">
                             <Logout fontSize="small" />
@@ -189,6 +246,49 @@ export default function Layout({ children }) {
             >
                 {children}
             </Box>
+
+            {/* Settings Dialog */}
+            <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} maxWidth="sm" fullWidth component="form" onSubmit={handleSettingsSave}>
+                <DialogTitle>Profile Settings</DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                        <input
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            id="profile-picture-upload"
+                            type="file"
+                            onChange={handleImgChange}
+                        />
+                        <label htmlFor="profile-picture-upload">
+                            <Box sx={{ position: 'relative', cursor: 'pointer' }}>
+                                <Avatar src={profileImg} sx={{ width: 100, height: 100, bgcolor: theme.palette.primary.dark, fontSize: 32 }}>
+                                    {!profileImg && `${settingsForm.first_name?.[0] || ''}${settingsForm.last_name?.[0] || ''}`}
+                                </Avatar>
+                                <Box sx={{
+                                    position: 'absolute', bottom: 0, right: 0,
+                                    bgcolor: 'primary.main', borderRadius: '50%', p: 0.5,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <CameraAlt sx={{ fontSize: 20, color: 'white' }} />
+                                </Box>
+                            </Box>
+                        </label>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <TextField label="First Name" value={settingsForm.first_name} onChange={(e) => setSettingsForm({ ...settingsForm, first_name: e.target.value })} fullWidth required />
+                        <TextField label="Last Name" value={settingsForm.last_name} onChange={(e) => setSettingsForm({ ...settingsForm, last_name: e.target.value })} fullWidth required />
+                    </Box>
+                    <TextField label="Email" type="email" value={settingsForm.email} onChange={(e) => setSettingsForm({ ...settingsForm, email: e.target.value })} fullWidth required />
+                    <TextField label="Department" value={settingsForm.department} onChange={(e) => setSettingsForm({ ...settingsForm, department: e.target.value })} fullWidth />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setSettingsOpen(false)} disabled={savingSettings}>Cancel</Button>
+                    <Button variant="contained" type="submit" disabled={savingSettings}>
+                        {savingSettings ? <CircularProgress size={20} color="inherit" /> : 'Save Changes'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
