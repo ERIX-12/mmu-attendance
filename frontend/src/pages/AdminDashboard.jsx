@@ -6,7 +6,7 @@ import {
     TextField, MenuItem, Select, FormControl, InputLabel,
     Chip, IconButton, CircularProgress, alpha,
 } from '@mui/material';
-import { Add, School, People, EventNote, Assessment, Download, Delete, Edit } from '@mui/icons-material';
+import { Add, School, People, EventNote, Assessment, Download, Delete, Edit, PlayArrow, Stop, QrCode2, CheckCircle, Warning } from '@mui/icons-material';
 import {
     Chart as ChartJS,
     CategoryScale, LinearScale, BarElement, ArcElement,
@@ -397,6 +397,92 @@ function UsersTab({ users, onRefresh }) {
     );
 }
 
+function AllSessionsTab() {
+    const [sessions, setSessions] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchSessions = async () => {
+        try {
+            const { data } = await sessionsApi.list();
+            setSessions(data.results || data);
+        } catch { toast.error('Failed to load sessions'); }
+        finally { setLoading(false); }
+    };
+
+    useEffect(() => {
+        fetchSessions();
+        const poll = setInterval(fetchSessions, 30000); // Poll every 30s
+        return () => clearInterval(poll);
+    }, []);
+
+    const handleActivate = async (id) => {
+        try {
+            await sessionsApi.activate(id);
+            toast.success('Session activated!');
+            fetchSessions();
+        } catch { toast.error('Failed to activate session'); }
+    };
+
+    const handleDeactivate = async (id) => {
+        try {
+            await sessionsApi.deactivate(id);
+            toast.success('Session closed.');
+            fetchSessions();
+        } catch { toast.error('Failed to close session'); }
+    };
+
+    return (
+        <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>All Sessions</Typography>
+            {loading ? <CircularProgress /> : (
+                <Card>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                {['Course', 'Lecturer', 'Date', 'Present', 'Absent', 'Total', 'Status', 'Actions'].map((h) => (
+                                    <TableCell key={h} sx={{ fontWeight: 700, color: 'text.secondary', fontSize: 12 }}>{h}</TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {sessions.map((s) => (
+                                <TableRow key={s.id} hover sx={{ bgcolor: s.is_active ? alpha('#43A047', 0.05) : undefined }}>
+                                    <TableCell><Chip label={s.course_code} size="small" color="primary" /></TableCell>
+                                    <TableCell>{s.lecturer?.full_name || s.lecturer?.username || '—'}</TableCell>
+                                    <TableCell>{s.date}</TableCell>
+                                    <TableCell>
+                                        <Chip label={s.present_count} size="small" color="success" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip label={s.absent_count} size="small" color="error" />
+                                    </TableCell>
+                                    <TableCell sx={{ fontSize: 12, fontWeight: 700, textAlign: 'center' }}>
+                                        {s.total_enrolled}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={s.is_active ? 'Active' : 'Closed'}
+                                            size="small"
+                                            color={s.is_active ? 'success' : 'default'}
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        {s.is_active ? (
+                                            <Button size="small" color="error" startIcon={<Stop />} onClick={() => handleDeactivate(s.id)}>Close</Button>
+                                        ) : (
+                                            <Button size="small" color="success" startIcon={<PlayArrow />} onClick={() => handleActivate(s.id)}>Activate</Button>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </Card>
+            )}
+        </Box>
+    );
+}
+
 function ReportsTab({ courses }) {
     const [selectedCourse, setSelectedCourse] = useState('');
     const [threshold, setThreshold] = useState(80);
@@ -540,13 +626,7 @@ export default function AdminDashboard() {
                     <Route index element={<Overview courses={courses} users={users} />} />
                     <Route path="courses" element={<CoursesTab courses={courses} users={users} onRefresh={fetchAll} />} />
                     <Route path="users" element={<UsersTab users={users} onRefresh={fetchAll} />} />
-                    <Route path="sessions" element={
-                        <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
-                            <EventNote sx={{ fontSize: 64, mb: 2, opacity: 0.3 }} />
-                            <Typography variant="h6">Session management coming soon</Typography>
-                            <Typography variant="body2">Admin can currently view sessions via Lecturer dashboards.</Typography>
-                        </Box>
-                    } />
+                    <Route path="sessions" element={<AllSessionsTab />} />
                     <Route path="reports" element={<ReportsTab courses={courses} />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Routes>

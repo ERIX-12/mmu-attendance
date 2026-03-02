@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import {
     QrCodeScanner, CheckCircle, Assignment, School,
-    History, EventBusy,
+    History, EventBusy, LibraryBooks
 } from '@mui/icons-material';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import {
@@ -40,18 +40,21 @@ function ScanTab({ onScanSuccess }) {
                     scanner.clear();
                     setScanning(false);
                     try {
-                        // Expected format: "session_id:secret"
-                        const [sessionId, secret] = decodedText.split(':');
-                        if (!sessionId || !secret) throw new Error('Invalid QR code format');
+                        // Expected format: "session:session_id:secret"
+                        const parts = decodedText.split(':');
+                        if (parts.length !== 3 || parts[0] !== 'session') throw new Error('Invalid QR code format');
+
+                        const sessionId = parts[1];
+                        const secret = parts[2];
 
                         await attendanceApi.markAttendance({
-                            session_id: parseInt(sessionId),
-                            qr_secret: secret,
+                            session_id: sessionId.trim(),
+                            qr_secret: secret.trim(),
                         });
                         toast.success('Attendance marked successfully!');
                         onScanSuccess();
                     } catch (err) {
-                        toast.error(err.response?.data?.detail || 'Failed to mark attendance. Try again.');
+                        toast.error(err.response?.data?.error || err.response?.data?.detail || err.message || 'Failed to mark attendance. Try again.');
                     }
                 },
                 (error) => { /* ignore scanning errors */ }
@@ -148,6 +151,84 @@ function HistoryTab() {
     );
 }
 
+// ─── Enroll Tab ───────────────────────────────────────────────────────────────
+function EnrollTab({ onEnrollChange }) {
+    const { user } = useAuthStore();
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchCourses = async () => {
+        try {
+            const { data } = await coursesApi.list({ available: 'true' });
+            setCourses(data.results || data);
+        } catch (err) {
+            toast.error('Failed to load courses');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchCourses(); }, []);
+
+    const toggleEnroll = async (courseId, isEnrolled) => {
+        try {
+            if (isEnrolled) {
+                await coursesApi.unenroll(courseId);
+                toast.success('Unenrolled successfully');
+            } else {
+                await coursesApi.enroll(courseId);
+                toast.success('Enrolled successfully');
+            }
+            fetchCourses();
+            if (onEnrollChange) onEnrollChange();
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Action failed');
+        }
+    };
+
+    if (loading) return <CircularProgress />;
+    if (!courses || courses.length === 0) {
+        return <Typography color="text.secondary">No courses available.</Typography>;
+    }
+
+    return (
+        <Grid container spacing={3}>
+            {courses.map(course => {
+                const isEnrolled = course.students?.some(s => s.id === user.id);
+                return (
+                    <Grid item xs={12} sm={6} md={4} key={course.id}>
+                        <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', border: isEnrolled ? '1px solid #1976d2' : '1px solid rgba(255,255,255,0.06)' }}>
+                            <CardContent sx={{ flexGrow: 1 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                    <Chip label={course.course_code} size="small" color={isEnrolled ? 'primary' : 'default'} />
+                                    {isEnrolled && <Chip label="Enrolled" color="success" size="small" variant="outlined" />}
+                                </Box>
+                                <Typography variant="h6" sx={{ mt: 1, mb: 0.5 }}>{course.name}</Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                    Lecturer: {course.lecturer_detail?.full_name || 'N/A'}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', mb: 2 }}>
+                                    {course.description || 'No description available'}
+                                </Typography>
+                            </CardContent>
+                            <Box sx={{ p: 2, pt: 0, textAlign: 'center' }}>
+                                <Button
+                                    variant={isEnrolled ? 'outlined' : 'contained'}
+                                    color={isEnrolled ? 'error' : 'primary'}
+                                    fullWidth
+                                    onClick={() => toggleEnroll(course.id, isEnrolled)}
+                                >
+                                    {isEnrolled ? 'Unenroll' : 'Enroll'}
+                                </Button>
+                            </Box>
+                        </Card>
+                    </Grid>
+                );
+            })}
+        </Grid>
+    );
+}
+
 // ─── Main Student Dashboard ────────────────────────────────────────────────────
 export default function StudentDashboard() {
     const navigate = useNavigate();
@@ -172,6 +253,7 @@ export default function StudentDashboard() {
 
     const tabs = [
         { label: 'Overview', path: '/student', icon: <School /> },
+        { label: 'Enroll', path: '/student/enroll', icon: <LibraryBooks /> },
         { label: 'Scan QR', path: '/student/scan', icon: <QrCodeScanner /> },
         { label: 'History', path: '/student/history', icon: <History /> },
     ];
@@ -276,6 +358,7 @@ export default function StudentDashboard() {
                                         </Grid>
                                     </Box>
                                 } />
+                                <Route path="enroll" element={<EnrollTab onEnrollChange={fetchSummary} />} />
                                 <Route path="scan" element={<ScanTab onScanSuccess={fetchSummary} />} />
                                 <Route path="history" element={<HistoryTab />} />
                                 <Route path="*" element={<Navigate to="/student" replace />} />

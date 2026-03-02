@@ -82,6 +82,8 @@ export const coursesApi = {
     enrollments: (params) => api.get('/courses/enrollments/', { params }),
     createEnrollment: (data) => api.post('/courses/enrollments/', data),
     deleteEnrollment: (id) => api.delete(`/courses/enrollments/${id}/`),
+    enroll: (id) => api.post(`/courses/${id}/enroll/`),
+    unenroll: (id) => api.delete(`/courses/${id}/unenroll/`),
 };
 
 // ─── Sessions ─────────────────────────────────────────────────────────────────
@@ -98,9 +100,10 @@ export const sessionsApi = {
 
 // ─── Attendance ───────────────────────────────────────────────────────────────
 export const attendanceApi = {
-    list: (params) => api.get('/attendance/records/', { params }),
-    markAttendance: (data) => api.post('/attendance/mark/', data),
-    summary: (params) => api.get('/attendance/summary/', { params }),
+    list: (params) => api.get('/sessions/attendance/records/', { params }),
+    getSessionRecords: (id) => api.get(`/sessions/${id}/attendance/`),
+    markAttendance: (data) => api.post('/sessions/attendance/mark/', data),
+    summary: (params) => api.get('/sessions/attendance/summary/', { params }),
 };
 
 // ─── Reports ─────────────────────────────────────────────────────────────────

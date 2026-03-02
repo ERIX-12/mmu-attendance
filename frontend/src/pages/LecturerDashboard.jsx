@@ -120,7 +120,7 @@ function QRPanel({ session, onRefresh }) {
                 {session.qr_code_image ? (
                     <img src={session.qr_code_image} alt="QR Code" style={{ width: 220, height: 220 }} />
                 ) : (
-                    <QRCodeSVG value={`${session.id}:${session.qr_code_secret}`} size={220} level="H" />
+                    <QRCodeSVG value={`session:${session.id}:${session.qr_code_secret}`} size={220} level="H" />
                 )}
             </Box>
             <Box sx={{ mb: 2 }}>
@@ -252,7 +252,7 @@ function SessionsTab({ courses }) {
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
-                                    {['Course', 'Date', 'Time', 'Venue', 'Attendance', 'Status', 'Actions'].map((h) => (
+                                    {['Course', 'Date', 'Time', 'Venue', 'Present', 'Absent', 'Total', 'Status', 'Actions'].map((h) => (
                                         <TableCell key={h} sx={{ fontWeight: 700, color: 'text.secondary', fontSize: 12 }}>{h}</TableCell>
                                     ))}
                                 </TableRow>
@@ -265,7 +265,13 @@ function SessionsTab({ courses }) {
                                         <TableCell sx={{ fontSize: 12 }}>{s.start_time}–{s.end_time}</TableCell>
                                         <TableCell>{s.venue || '—'}</TableCell>
                                         <TableCell>
-                                            <Chip label={s.attendance_count} size="small" color="info" icon={<People />} />
+                                            <Chip label={s.present_count} size="small" color="success" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip label={s.absent_count} size="small" color="error" />
+                                        </TableCell>
+                                        <TableCell sx={{ fontSize: 12, fontWeight: 700, textAlign: 'center' }}>
+                                            {s.total_enrolled}
                                         </TableCell>
                                         <TableCell>
                                             <Chip
@@ -314,6 +320,112 @@ function SessionsTab({ courses }) {
                 </DialogActions>
             </Dialog>
         </Grid>
+    );
+}
+
+// ─── Attendance Tab ───────────────────────────────────────────────────────────
+function AttendanceTab() {
+    const { user } = useAuthStore();
+    const [sessions, setSessions] = useState([]);
+    const [selectedSession, setSelectedSession] = useState('');
+    const [records, setRecords] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [fetchingRecords, setFetchingRecords] = useState(false);
+
+    useEffect(() => {
+        sessionsApi.list({ lecturer: user.id }).then(({ data }) => {
+            setSessions(data.results || data);
+            setLoading(false);
+        }).catch(() => {
+            toast.error('Failed to load sessions');
+            setLoading(false);
+        });
+    }, [user.id]);
+
+    useEffect(() => {
+        if (!selectedSession) {
+            setRecords([]);
+            return;
+        }
+        setFetchingRecords(true);
+        attendanceApi.getSessionRecords(selectedSession).then(({ data }) => {
+            setRecords(data);
+        }).catch(() => {
+            toast.error('Failed to load attendance records');
+        }).finally(() => {
+            setFetchingRecords(false);
+        });
+    }, [selectedSession]);
+
+    if (loading) return <CircularProgress />;
+
+    return (
+        <Card sx={{ p: 3 }}>
+            <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+                <FormControl sx={{ minWidth: 350 }}>
+                    <InputLabel>Select Session</InputLabel>
+                    <Select
+                        value={selectedSession}
+                        label="Select Session"
+                        onChange={(e) => setSelectedSession(e.target.value)}
+                    >
+                        <MenuItem value="">
+                            <em>None</em>
+                        </MenuItem>
+                        {sessions.map((s) => (
+                            <MenuItem key={s.id} value={s.id}>
+                                {s.course_code} — {s.date} ({s.start_time}) — {s.title || s.topic || 'No Topic'}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                {fetchingRecords && <CircularProgress size={24} />}
+            </Box>
+
+            {selectedSession && !fetchingRecords && (
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell sx={{ fontWeight: 700 }}>Student Name</TableCell>
+                            <TableCell sx={{ fontWeight: 700 }}>Student Number</TableCell>
+                            <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                            <TableCell sx={{ fontWeight: 700 }}>Time Marked</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {records.length > 0 ? (
+                            records.map((r) => (
+                                <TableRow key={r.id} hover>
+                                    <TableCell>{r.student?.first_name} {r.student?.last_name}</TableCell>
+                                    <TableCell>{r.student?.username}</TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={r.status.toUpperCase()}
+                                            size="small"
+                                            color={r.status === 'present' ? 'success' : 'error'}
+                                        />
+                                    </TableCell>
+                                    <TableCell>{new Date(r.marked_at).toLocaleString()}</TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={4} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                                    No attendance records found for this session.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            )}
+
+            {!selectedSession && (
+                <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
+                    <CheckCircle sx={{ fontSize: 64, opacity: 0.3, mb: 2 }} />
+                    <Typography>Select a session to view its live attendance records.</Typography>
+                </Box>
+            )}
+        </Card>
     );
 }
 
@@ -372,7 +484,7 @@ export default function LecturerDashboard() {
                                     <Grid item xs={12} sm={4}>
                                         <StatCard
                                             title="Total Students"
-                                            value={courses.reduce((a, c) => a + c.enrollment_count, 0)}
+                                            value={courses.reduce((a, c) => a + (c.student_count || 0), 0)}
                                             icon={<People />} color="success"
                                         />
                                     </Grid>
@@ -407,19 +519,14 @@ export default function LecturerDashboard() {
                                                 <TableCell><Chip label={c.course_code} color="primary" size="small" /></TableCell>
                                                 <TableCell>{c.name}</TableCell>
                                                 <TableCell>{c.credits}</TableCell>
-                                                <TableCell>{c.enrollment_count}</TableCell>
+                                                <TableCell>{c.student_count}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
                                 </Table>
                             </Card>
                         } />
-                        <Route path="attendance" element={
-                            <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
-                                <CheckCircle sx={{ fontSize: 64, mb: 2, opacity: 0.3 }} />
-                                <Typography variant="h6">Detailed attendance logs coming soon</Typography>
-                            </Box>
-                        } />
+                        <Route path="attendance" element={<AttendanceTab />} />
                         <Route path="at-risk" element={
                             <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
                                 <Warning sx={{ fontSize: 64, mb: 2, opacity: 0.3 }} />

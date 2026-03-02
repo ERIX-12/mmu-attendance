@@ -25,21 +25,19 @@ class CourseListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         if user.is_superuser:
             # Admin can see all courses
-            pass
+            if self.request.query_params.get('all') == 'true':
+                return queryset
+            return queryset.filter(is_active=True)
         elif user.is_staff:
             # Lecturers can see their own courses
-            queryset = queryset.filter(lecturer=user)
+            if self.request.query_params.get('all') == 'true':
+                return queryset.filter(lecturer=user)
+            return queryset.filter(lecturer=user, is_active=True)
         else:
-            # Students can see enrolled courses
-            queryset = queryset.filter(students=user)
-        
-        # Handle 'all' parameter for admin
-        if self.request.query_params.get('all') == 'true' and user.is_superuser:
-            return queryset
-        elif not user.is_superuser:
-            return queryset.filter(is_active=True)
-        
-        return queryset
+            # Students can see enrolled courses, or all available if requested
+            if self.request.query_params.get('available') == 'true':
+                return queryset.filter(is_active=True)
+            return queryset.filter(students=user, is_active=True)
 
     def perform_create(self, serializer):
         # Only lecturers and admins can create courses
@@ -79,10 +77,13 @@ def enroll_in_course(request, course_id):
         course=course
     )
     
+    course.students.add(request.user)
+    
     if created:
         return Response({'message': 'Successfully enrolled in course'}, status=status.HTTP_201_CREATED)
     else:
-        return Response({'error': 'Already enrolled in this course'}, status=status.HTTP_400_BAD_REQUEST)
+        # Also return success here because we just ensured they are added to `students`
+        return Response({'message': 'Successfully enrolled in course'}, status=status.HTTP_200_OK)
 
 
 @api_view(['DELETE'])
@@ -91,12 +92,16 @@ def unenroll_from_course(request, course_id):
     """Unenroll a student from a course"""
     course = get_object_or_404(Course, id=course_id)
     
+    # Ensure the user is removed from M2M regardless of Enrollment object status
+    course.students.remove(request.user)
+    
     try:
         enrollment = Enrollment.objects.get(student=request.user, course=course)
         enrollment.delete()
         return Response({'message': 'Successfully unenrolled from course'}, status=status.HTTP_200_OK)
     except Enrollment.DoesNotExist:
-        return Response({'error': 'Not enrolled in this course'}, status=status.HTTP_400_BAD_REQUEST)
+        # Still return 200 OK because the student was successfully removed from the course.students table above
+        return Response({'message': 'Successfully unenrolled from course'}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

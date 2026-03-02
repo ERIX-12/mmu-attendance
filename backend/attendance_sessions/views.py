@@ -100,10 +100,8 @@ def refresh_qr_code(request, session_id):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def mark_attendance(request, session_id):
-    """Mark attendance for a student"""
+def _process_mark_attendance(request, session_id):
+    """Core logic to mark attendance for a student"""
     session = get_object_or_404(AttendanceSession, id=session_id)
     
     # Only students can mark attendance
@@ -113,6 +111,13 @@ def mark_attendance(request, session_id):
     # Check if session is active
     if session.status != 'active':
         return Response({'error': 'Session is not active'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    # Check qr_secret
+    qr_secret = request.data.get('qr_secret')
+    print(f"MARK ATTENDANCE - session={session_id}, qr_secret_provided='{qr_secret}', session_actual_secret='{session.qr_code_secret}'")
+    
+    if not qr_secret or qr_secret != session.qr_code_secret:
+        return Response({'error': 'Invalid or expired QR code'}, status=status.HTTP_400_BAD_REQUEST)
     
     # Check if student is enrolled in the course
     if not session.course.students.filter(id=request.user.id).exists():
@@ -133,6 +138,13 @@ def mark_attendance(request, session_id):
         return Response({'message': 'Attendance marked successfully'}, status=status.HTTP_201_CREATED)
     else:
         return Response({'error': 'Attendance already marked'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_attendance(request, session_id):
+    """Mark attendance for a student"""
+    return _process_mark_attendance(request, session_id)
 
 
 @api_view(['GET'])
@@ -220,11 +232,70 @@ def mark_attendance_alt(request):
     if not session_id:
         return Response({'error': 'Session ID required'}, status=status.HTTP_400_BAD_REQUEST)
     
-    return mark_attendance(request, session_id)
+    return _process_mark_attendance(request, session_id)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def attendance_summary_alt(request):
-    """Alternative endpoint for attendance summary"""
-    return attendance_summary_view(request)
+    """Alternative endpoint for attendance summary, returning array of course metrics for students"""
+    user = request.user
+    if user.is_staff or user.is_superuser:
+        return attendance_summary_view(request)
+        
+    enrolled_courses = user.courses_enrolled.all()
+    summary = []
+    
+    for course in enrolled_courses:
+        # Get all completed sessions for this course
+        total_sessions = AttendanceSession.objects.filter(
+            course=course, 
+            status__in=['active', 'completed']
+        ).count()
+        
+        # Get attended sessions for this course
+        attended_sessions = AttendanceRecord.objects.filter(
+            student=user,
+            session__course=course,
+            status='present'
+        ).count()
+        
+        percentage = 0
+        if total_sessions > 0:
+            percentage = round((attended_sessions / total_sessions) * 100)
+            
+        summary.append({
+            'course_id': course.id,
+            'course_code': course.code,
+            'course_name': course.name,
+            'attendance_percentage': percentage,
+            'below_threshold': percentage < 80 and total_sessions > 0,
+            'attended_sessions': attended_sessions,
+            'total_sessions': total_sessions
+        })
+        
+    return Response(summary, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def student_attendance_records(request):
+    """Get all attendance records for the current student"""
+    user = request.user
+    if user.is_staff or user.is_superuser:
+        records = AttendanceRecord.objects.all().select_related('session', 'session__course').order_by('-marked_at')
+    else:
+        records = AttendanceRecord.objects.filter(student=user).select_related('session', 'session__course').order_by('-marked_at')
+    
+    data = []
+    for r in records:
+        data.append({
+            'id': r.id,
+            'timestamp': r.marked_at,
+            'status': r.status,
+            'session_info': {
+                'date': r.session.date,
+                'course_code': r.session.course.code,
+                'course_name': r.session.course.name,
+            }
+        })
+    return Response(data, status=status.HTTP_200_OK)

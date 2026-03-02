@@ -11,6 +11,7 @@ urlpatterns = [
     path('<uuid:session_id>/mark-attendance/', views.mark_attendance, name='mark-attendance'),
     path('<uuid:session_id>/attendance/', views.get_session_attendance, name='session-attendance'),
     path('summary/', views.attendance_summary_view, name='attendance-summary'),
-    path('attendance/summary/', views.attendance_summary_view, name='attendance-summary-alt'),
+    path('attendance/summary/', views.attendance_summary_alt, name='attendance-summary-alt'),
     path('attendance/mark/', views.mark_attendance_alt, name='mark-attendance-alt'),
+    path('attendance/records/', views.student_attendance_records, name='student-attendance-records'),
 ]
