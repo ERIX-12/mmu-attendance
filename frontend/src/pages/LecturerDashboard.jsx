@@ -429,6 +429,92 @@ function AttendanceTab() {
     );
 }
 
+// ─── At-Risk Tab ──────────────────────────────────────────────────────────────
+function AtRiskTab({ courses }) {
+    const [selectedCourse, setSelectedCourse] = useState('');
+    const [threshold, setThreshold] = useState(80);
+    const [loading, setLoading] = useState(false);
+    const [atRisk, setAtRisk] = useState(null);
+
+    const handleViewAtRisk = async () => {
+        if (!selectedCourse) return toast.error('Select a course first');
+        setLoading(true);
+        try {
+            const { data } = await reportsApi.belowThreshold(selectedCourse, { threshold });
+            setAtRisk(data);
+        } catch { toast.error('Failed to fetch data'); }
+        finally { setLoading(false); }
+    };
+
+    return (
+        <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>Monitor At-Risk Students</Typography>
+            <Card sx={{ p: 3, mb: 3 }}>
+                <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} md={5}>
+                        <FormControl fullWidth>
+                            <InputLabel>Select Course</InputLabel>
+                            <Select value={selectedCourse} label="Select Course" onChange={(e) => setSelectedCourse(e.target.value)}>
+                                {courses.map((c) => <MenuItem key={c.id} value={c.id}>{c.course_code} – {c.name}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                        <TextField
+                            label="Threshold (%)" type="number" value={threshold}
+                            onChange={(e) => setThreshold(e.target.value)} fullWidth
+                            inputProps={{ min: 0, max: 100 }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={5}>
+                        <Button variant="contained" onClick={handleViewAtRisk} disabled={loading}>
+                            {loading ? <CircularProgress size={24} color="inherit" /> : 'View At-Risk Students'}
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Card>
+            {atRisk && (
+                <Card>
+                    <CardHeader
+                        title={`At-Risk Students: ${atRisk.course}`}
+                        subheader={`${atRisk.below_threshold} of ${atRisk.total_students} below ${atRisk.threshold}% threshold`}
+                    />
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                {['Student Number', 'Name', 'Attended', 'Total', 'Percentage'].map((h) => (
+                                    <TableCell key={h} sx={{ fontWeight: 700 }}>{h}</TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {atRisk.students.length > 0 ? (
+                                atRisk.students.map((s, i) => (
+                                    <TableRow key={i} sx={{ bgcolor: alpha('#E53935', 0.05) }}>
+                                        <TableCell>{s.student_number}</TableCell>
+                                        <TableCell>{s.full_name}</TableCell>
+                                        <TableCell>{s.attended}</TableCell>
+                                        <TableCell>{s.total_sessions}</TableCell>
+                                        <TableCell>
+                                            <Chip label={`${s.percentage}%`} size="small" color="error" />
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                                        No students below the {threshold}% threshold.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </Card>
+            )}
+        </Box>
+    );
+}
+
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 export default function LecturerDashboard() {
     const navigate = useNavigate();
@@ -527,12 +613,7 @@ export default function LecturerDashboard() {
                             </Card>
                         } />
                         <Route path="attendance" element={<AttendanceTab />} />
-                        <Route path="at-risk" element={
-                            <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
-                                <Warning sx={{ fontSize: 64, mb: 2, opacity: 0.3 }} />
-                                <Typography variant="h6">At-Risk student monitoring coming soon</Typography>
-                            </Box>
-                        } />
+                        <Route path="at-risk" element={<AtRiskTab courses={courses} />} />
                         <Route path="reports" element={
                             <Box>
                                 <Typography variant="h6" sx={{ mb: 2 }}>Download Reports</Typography>

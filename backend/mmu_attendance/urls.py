@@ -30,4 +30,5 @@ urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('api/courses/', include('courses.urls')),
     path('api/sessions/', include('attendance_sessions.urls')),
+    path('api/reports/', include('mmu_attendance.report_urls')),
 ]
