@@ -325,7 +325,7 @@ function UsersTab({ users, onRefresh }) {
                 <Typography variant="h6">All Users ({users.length})</Typography>
                 <Button variant="contained" startIcon={<Add />} onClick={handleOpenCreate}>New User</Button>
             </Box>
-            <Card>
+            <TableContainer component={Card} sx={{ overflowX: 'auto' }}>
                 <Table>
                     <TableHead>
                         <TableRow>
@@ -363,8 +363,8 @@ function UsersTab({ users, onRefresh }) {
                         ))}
                     </TableBody>
                 </Table>
-            </Card>
-            <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+            </TableContainer>
+            <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth component="form" onSubmit={handleSave}>
                 <DialogTitle>{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
                 <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
                     <Box sx={{ display: 'flex', gap: 2 }}>
