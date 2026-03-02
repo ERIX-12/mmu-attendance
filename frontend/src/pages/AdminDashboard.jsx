@@ -126,6 +126,7 @@ function CoursesTab({ courses, users, onRefresh }) {
         try {
             const payload = {
                 code: form.course_code,
+                course_code: form.course_code,
                 name: form.name,
                 credits: form.credits,
                 lecturer_id: form.lecturer,
@@ -142,7 +143,13 @@ function CoursesTab({ courses, users, onRefresh }) {
             await onRefresh();
         } catch (e) {
             console.error('Course save error:', e.response?.data);
-            toast.error(e.response?.data?.code?.[0] || 'Failed to save course');
+            const errs = e.response?.data;
+            let errMsg = 'Failed to save course';
+            if (errs) {
+                const firstKey = Object.keys(errs)[0];
+                errMsg = `${firstKey}: ${errs[firstKey][0]}`;
+            }
+            toast.error(errMsg);
         } finally { setSaving(false); }
     };
 
@@ -605,7 +612,11 @@ export default function AdminDashboard() {
         finally { setLoading(false); }
     };
 
-    useEffect(() => { fetchAll(); }, []);
+    useEffect(() => {
+        fetchAll();
+        const interval = setInterval(fetchAll, 10000);
+        return () => clearInterval(interval);
+    }, []);
 
     const tabs = [
         { label: 'Overview', path: '/admin' },

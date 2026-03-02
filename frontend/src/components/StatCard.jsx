@@ -1,7 +1,13 @@
-import { Box, Card, CardContent, Typography, LinearProgress, alpha } from '@mui/material';
+import { Box, Card, CardContent, Typography, LinearProgress, alpha, keyframes } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-export default function StatCard({ title, value, subtitle, icon, color = 'primary', trend }) {
+const float = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+`;
+
+export default function StatCard({ title, value, subtitle, icon, color = 'primary', trend, animate = true }) {
     const theme = useTheme();
     const c = theme.palette[color]?.main || color;
 
@@ -9,54 +15,129 @@ export default function StatCard({ title, value, subtitle, icon, color = 'primar
         <Card
             sx={{
                 height: '100%',
-                background: `linear-gradient(135deg, ${alpha(c, 0.12)} 0%, ${alpha(c, 0.04)} 100%)`,
-                border: `1px solid ${alpha(c, 0.2)}`,
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                position: 'relative',
+                overflow: 'hidden',
+                background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.4)} 100%)`,
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
+                borderRadius: 4,
+                boxShadow: `0 8px 32px 0 ${alpha(c, 0.15)}`,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                animation: animate ? `${float} 6s ease-in-out infinite` : 'none',
                 '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: `0 8px 30px ${alpha(c, 0.25)}`,
+                    transform: 'translateY(-6px) scale(1.02)',
+                    boxShadow: `0 12px 48px 0 ${alpha(c, 0.3)}`,
+                    border: `1px solid ${alpha(c, 0.5)}`,
+                    '& .icon-wrapper': {
+                        transform: 'scale(1.15) rotate(5deg)',
+                        boxShadow: `0 0 20px ${alpha(c, 0.6)}`,
+                    },
+                    '& .bg-glow': {
+                        opacity: 0.6,
+                    }
                 },
             }}
         >
-            <CardContent sx={{ p: 2.5 }}>
+            {/* Background Glow */}
+            <Box
+                className="bg-glow"
+                sx={{
+                    position: 'absolute',
+                    top: '-50%',
+                    right: '-20%',
+                    width: '150px',
+                    height: '150px',
+                    borderRadius: '50%',
+                    background: `radial-gradient(circle, ${alpha(c, 0.4)} 0%, transparent 70%)`,
+                    filter: 'blur(30px)',
+                    opacity: 0.3,
+                    transition: 'opacity 0.4s ease',
+                    zIndex: 0,
+                }}
+            />
+
+            <CardContent sx={{ p: 3, position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
                     <Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
+                        <Typography
+                            variant="subtitle2"
+                            sx={{
+                                mb: 1,
+                                fontWeight: 600,
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px',
+                                color: alpha(theme.palette.text.primary, 0.7)
+                            }}
+                        >
                             {title}
                         </Typography>
-                        <Typography variant="h4" sx={{ fontWeight: 700, color: c, lineHeight: 1 }}>
+                        <Typography
+                            variant="h3"
+                            sx={{
+                                fontWeight: 800,
+                                lineHeight: 1,
+                                background: `linear-gradient(45deg, ${theme.palette.text.primary} 30%, ${c} 100%)`,
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                display: 'inline-block'
+                            }}
+                        >
                             {value}
                         </Typography>
                     </Box>
                     <Box
+                        className="icon-wrapper"
                         sx={{
-                            p: 1.25, borderRadius: 2,
-                            background: alpha(c, 0.15),
-                            color: c, display: 'flex',
+                            p: 1.5,
+                            borderRadius: '16px',
+                            background: `linear-gradient(135deg, ${alpha(c, 0.2)} 0%, ${alpha(c, 0.05)} 100%)`,
+                            border: `1px solid ${alpha(c, 0.2)}`,
+                            color: c,
+                            display: 'flex',
+                            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                            backdropFilter: 'blur(10px)',
                         }}
                     >
                         {icon}
                     </Box>
                 </Box>
-                {subtitle && (
-                    <Typography variant="caption" color="text.secondary">{subtitle}</Typography>
-                )}
-                {trend !== undefined && (
-                    <Box sx={{ mt: 1 }}>
-                        <LinearProgress
-                            variant="determinate"
-                            value={Math.min(trend, 100)}
-                            sx={{
-                                borderRadius: 4, height: 5,
-                                bgcolor: alpha(c, 0.15),
-                                '& .MuiLinearProgress-bar': { bgcolor: c, borderRadius: 4 },
-                            }}
-                        />
-                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                            {trend}%
+
+                <Box>
+                    {subtitle && (
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            {subtitle}
                         </Typography>
-                    </Box>
-                )}
+                    )}
+
+                    {trend !== undefined && (
+                        <Box sx={{ mt: 2 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 0.5 }}>
+                                <Typography variant="caption" sx={{ fontWeight: 600, color: alpha(theme.palette.text.primary, 0.8) }}>
+                                    Target Met
+                                </Typography>
+                                <Typography variant="caption" sx={{ fontWeight: 800, color: c }}>
+                                    {trend}%
+                                </Typography>
+                            </Box>
+                            <Box sx={{ position: 'relative', height: 6, width: '100%', borderRadius: 3, bgcolor: alpha(c, 0.1), overflow: 'hidden' }}>
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        height: '100%',
+                                        width: `${Math.min(trend, 100)}%`,
+                                        background: `linear-gradient(90deg, ${c} 0%, ${theme.palette.mode === 'dark' ? theme.palette.common.white : c} 100%)`,
+                                        borderRadius: 3,
+                                        boxShadow: `0 0 10px ${alpha(c, 0.8)}`,
+                                        transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    }}
+                                />
+                            </Box>
+                        </Box>
+                    )}
+                </Box>
             </CardContent>
         </Card>
     );
