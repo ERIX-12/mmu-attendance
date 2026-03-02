@@ -17,11 +17,12 @@ class UserSerializer(serializers.ModelSerializer):
     student_number = serializers.CharField(source='profile.student_number', read_only=True)
     staff_id = serializers.CharField(source='profile.staff_id', read_only=True)
     department = serializers.CharField(source='profile.department', read_only=True)
+    profile_picture = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'full_name', 'role', 
-                  'student_number', 'staff_id', 'department', 'is_staff', 'is_superuser', 'is_active']
+                  'student_number', 'staff_id', 'department', 'profile_picture', 'is_staff', 'is_superuser', 'is_active']
     
     def get_role(self, obj):
         try:
@@ -33,6 +34,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
+        
+    def get_profile_picture(self, obj):
+        try:
+            if obj.profile.profile_picture:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.profile.profile_picture.url)
+                return obj.profile.profile_picture.url
+        except Exception:
+            return None
+        return None
 
 
 class LoginSerializer(serializers.Serializer):
@@ -301,13 +313,40 @@ def users_list_view(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PATCH'])
 def user_profile_view(request):
     """
-    Get current user profile
+    Get or update current user profile
     """
-    serializer = UserSerializer(request.user)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    if request.method == 'GET':
+        serializer = UserSerializer(request.user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+    elif request.method == 'PATCH':
+        user = request.user
+        
+        # Update User basic info
+        user.first_name = request.data.get('first_name', user.first_name)
+        user.last_name = request.data.get('last_name', user.last_name)
+        if 'email' in request.data:
+            user.email = request.data.get('email')
+        user.save()
+        
+        # Update UserProfile
+        profile = user.profile
+        if 'department' in request.data:
+            profile.department = request.data.get('department')
+            
+        if 'profile_picture' in request.FILES:
+            profile.profile_picture = request.FILES['profile_picture']
+            
+        profile.save()
+        
+        serializer = UserSerializer(user, context={'request': request})
+        return Response({
+            'user': serializer.data,
+            'message': 'Profile updated successfully'
+        }, status=status.HTTP_200_OK)
 @api_view(['GET', 'PATCH', 'DELETE'])
 def user_detail_view(request, user_id):
     """

@@ -13,6 +13,7 @@ class UserProfile(models.Model):
     student_number = models.CharField(max_length=50, blank=True)
     staff_id = models.CharField(max_length=50, blank=True)
     department = models.CharField(max_length=100, blank=True)
+    profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
     
     def __str__(self):
         return f"{self.user.username}'s profile"
