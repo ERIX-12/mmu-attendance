@@ -71,6 +71,11 @@ export default function Layout({ children }) {
     const [profileImgFile, setProfileImgFile] = useState(null);
     const [savingSettings, setSavingSettings] = useState(false);
 
+    const [createAdminOpen, setCreateAdminOpen] = useState(false);
+    const [createAdminForm, setCreateAdminForm] = useState({ first_name: '', last_name: '', username: '', email: '', password: '', confirm_password: '' });
+    const [creatingAdmin, setCreatingAdmin] = useState(false);
+    const [showAdminPass, setShowAdminPass] = useState(false);
+
     const openSettings = () => {
         setSettingsForm({
             first_name: user?.first_name || '',
@@ -114,6 +119,31 @@ export default function Layout({ children }) {
         }
     };
 
+    const handleCreateAdminSubmit = async (e) => {
+        e.preventDefault();
+        if (!createAdminForm.first_name || !createAdminForm.last_name || !createAdminForm.username || !createAdminForm.email || !createAdminForm.password) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+        if (createAdminForm.password !== createAdminForm.confirm_password) {
+            toast.error('Passwords do not match');
+            return;
+        }
+        setCreatingAdmin(true);
+        try {
+            await authApi.register({ ...createAdminForm, role: 'admin' });
+            toast.success('Admin account created successfully!');
+            setCreateAdminOpen(false);
+            setCreateAdminForm({ first_name: '', last_name: '', username: '', email: '', password: '', confirm_password: '' });
+        } catch (err) {
+            const errs = err.response?.data;
+            const firstErr = errs ? Object.values(errs)[0][0] : 'Failed to create admin';
+            toast.error(typeof firstErr === 'string' ? firstErr : 'Failed to create admin');
+        } finally {
+            setCreatingAdmin(false);
+        }
+    };
+
     const drawerContent = (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 2 }}>
             {/* Logo */}
@@ -123,7 +153,7 @@ export default function Layout({ children }) {
                         width: 40, height: 40, borderRadius: '10px',
                         background: 'linear-gradient(135deg, #1565C0, #003C8F)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: 800, fontSize: 18, color: '#fff',
+                        fontWeight: 800, fontSize: 18, color: '#ffffff',
                     }}
                 >M</Box>
                 <Box>
@@ -202,7 +232,7 @@ export default function Layout({ children }) {
         <Box sx={{ display: 'flex', minHeight: '100vh' }}>
             {/* Mobile AppBar */}
             {isMobile && (
-                <AppBar position="fixed" elevation={0} sx={{ bgcolor: 'background.paper', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <AppBar position="fixed" elevation={0} sx={{ bgcolor: 'background.paper', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
                     <Toolbar>
                         <IconButton onClick={() => setDrawerOpen(true)} edge="start" sx={{ mr: 2 }}>
                             <MenuIcon />
@@ -225,7 +255,7 @@ export default function Layout({ children }) {
                         boxSizing: 'border-box',
                         bgcolor: 'background.paper',
                         border: 'none',
-                        borderRight: '1px solid rgba(255,255,255,0.06)',
+                        borderRight: '1px solid rgba(0,0,0,0.08)',
                     },
                 }}
             >
@@ -281,11 +311,53 @@ export default function Layout({ children }) {
                     </Box>
                     <TextField label="Email" type="email" value={settingsForm.email} onChange={(e) => setSettingsForm({ ...settingsForm, email: e.target.value })} fullWidth required />
                     <TextField label="Department" value={settingsForm.department} onChange={(e) => setSettingsForm({ ...settingsForm, department: e.target.value })} fullWidth />
+
+                    {user?.role === 'admin' && (
+                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+                            <Typography variant="subtitle2" sx={{ mb: 1.5, color: 'text.secondary' }}>System Management</Typography>
+                            <Button variant="outlined" color="primary" fullWidth onClick={() => { setSettingsOpen(false); setCreateAdminOpen(true); }}>
+                                Create New Admin Account
+                            </Button>
+                        </Box>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setSettingsOpen(false)} disabled={savingSettings}>Cancel</Button>
                     <Button variant="contained" type="submit" disabled={savingSettings}>
                         {savingSettings ? <CircularProgress size={20} color="inherit" /> : 'Save Changes'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Create Admin Dialog */}
+            <Dialog open={createAdminOpen} onClose={() => setCreateAdminOpen(false)} maxWidth="sm" fullWidth component="form" onSubmit={handleCreateAdminSubmit}>
+                <DialogTitle>Create New Admin Account</DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <TextField label="First Name" value={createAdminForm.first_name} onChange={(e) => setCreateAdminForm({ ...createAdminForm, first_name: e.target.value })} fullWidth required />
+                        <TextField label="Last Name" value={createAdminForm.last_name} onChange={(e) => setCreateAdminForm({ ...createAdminForm, last_name: e.target.value })} fullWidth required />
+                    </Box>
+                    <TextField label="Username" value={createAdminForm.username} onChange={(e) => setCreateAdminForm({ ...createAdminForm, username: e.target.value })} fullWidth required />
+                    <TextField label="Email" type="email" value={createAdminForm.email} onChange={(e) => setCreateAdminForm({ ...createAdminForm, email: e.target.value })} fullWidth required />
+
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <TextField
+                            label="Password" type={showAdminPass ? 'text' : 'password'} value={createAdminForm.password} onChange={(e) => setCreateAdminForm({ ...createAdminForm, password: e.target.value })} fullWidth required
+                        />
+                        <TextField
+                            label="Confirm Password" type={showAdminPass ? 'text' : 'password'} value={createAdminForm.confirm_password} onChange={(e) => setCreateAdminForm({ ...createAdminForm, confirm_password: e.target.value })} fullWidth required
+                        />
+                    </Box>
+                    <Box sx={{ textAlign: 'right', mt: -1 }}>
+                        <Button size="small" onClick={() => setShowAdminPass(!showAdminPass)} sx={{ textTransform: 'none' }}>
+                            {showAdminPass ? 'Hide Passwords' : 'Show Passwords'}
+                        </Button>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setCreateAdminOpen(false)} disabled={creatingAdmin}>Cancel</Button>
+                    <Button variant="contained" type="submit" disabled={creatingAdmin}>
+                        {creatingAdmin ? <CircularProgress size={20} color="inherit" /> : 'Create Admin'}
                     </Button>
                 </DialogActions>
             </Dialog>

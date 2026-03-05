@@ -197,7 +197,7 @@ function EnrollTab({ onEnrollChange }) {
                 const isEnrolled = course.students?.some(s => s.id === user.id);
                 return (
                     <Grid item xs={12} sm={6} md={4} key={course.id}>
-                        <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', border: isEnrolled ? '1px solid #1976d2' : '1px solid rgba(255,255,255,0.06)' }}>
+                        <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', border: isEnrolled ? '1px solid #1976d2' : '1px solid rgba(0,0,0,0.08)' }}>
                             <CardContent sx={{ flexGrow: 1 }}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                     <Chip label={course.course_code} size="small" color={isEnrolled ? 'primary' : 'default'} />
@@ -308,7 +308,7 @@ export default function StudentDashboard() {
                         <Tabs
                             value={currentTab}
                             onChange={(_, v) => navigate(tabs[v].path)}
-                            sx={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                            sx={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}
                         >
                             {tabs.map((t) => (
                                 <Tab key={t.path} icon={t.icon} iconPosition="start" label={t.label} />
@@ -323,7 +323,7 @@ export default function StudentDashboard() {
                                             {summary.map((course) => (
                                                 <Grid item xs={12} sm={6} md={4} key={course.course_id}>
                                                     <Card sx={{
-                                                        border: course.below_threshold ? '1px solid #E53935' : '1px solid rgba(255,255,255,0.06)',
+                                                        border: course.below_threshold ? '1px solid #E53935' : '1px solid rgba(0,0,0,0.08)',
                                                         position: 'relative', overflow: 'visible'
                                                     }}>
                                                         {course.below_threshold && (

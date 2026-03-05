@@ -148,7 +148,7 @@ export default function LoginPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #0A0E1A 0%, #0D1B40 50%, #0A0E1A 100%)',
+                background: 'linear-gradient(135deg, #F4F7F9 0%, #0D1B40 50%, #F4F7F9 100%)',
                 p: 2,
                 position: 'relative',
                 overflow: 'hidden',
@@ -179,9 +179,9 @@ export default function LoginPage() {
                     maxWidth: tabIndex === 0 ? 420 : 500,
                     width: '100%',
                     p: 2,
-                    background: 'rgba(19,25,41,0.9)',
+                    background: 'rgba(255,255,255,0.95)',
                     backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(0,0,0,0.08)',
                     position: 'relative',
                     zIndex: 1,
                     transition: 'max-width 0.3s ease'
@@ -193,13 +193,13 @@ export default function LoginPage() {
                         <Box
                             sx={{
                                 width: 64, height: 64, borderRadius: '16px',
-                                background: 'linear-gradient(135deg, #1565C0 0%, #003C8F 100%)',
+                                background: 'linear-gradient(135deg, #0b52a1 0%, #2e9bf4 100%)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 margin: '0 auto 16px',
                                 boxShadow: '0 8px 30px rgba(21,101,192,0.5)',
                             }}
                         >
-                            <School sx={{ fontSize: 32, color: '#fff' }} />
+                            <School sx={{ fontSize: 32, color: '#ffffff' }} />
                         </Box>
                         <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
                             MMU Attendance System
@@ -380,7 +380,7 @@ export default function LoginPage() {
                     <Box
                         sx={{
                             mt: 3, p: 1.5, borderRadius: 2,
-                            background: alpha('#1565C0', 0.1),
+                            background: alpha('#0b52a1', 0.05),
                             border: '1px solid rgba(21,101,192,0.2)',
                         }}
                     >

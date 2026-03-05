@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                         style: {
                             background: '#1A2035',
                             color: '#E8EAF0',
-                            border: '1px solid rgba(255,255,255,0.08)',
+                            border: '1px solid rgba(0,0,0,0.08)',
                             borderRadius: '12px',
                         },
                         success: { iconTheme: { primary: '#43A047', secondary: '#fff' } },
