@@ -148,7 +148,7 @@ export default function LoginPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #F4F7F9 0%, #0D1B40 50%, #F4F7F9 100%)',
+                background: 'linear-gradient(135deg, #F0F4F8 0%, #D9E2EC 50%, #F0F4F8 100%)',
                 p: 2,
                 position: 'relative',
                 overflow: 'hidden',
@@ -179,11 +179,12 @@ export default function LoginPage() {
                     maxWidth: tabIndex === 0 ? 420 : 500,
                     width: '100%',
                     p: 2,
-                    background: 'rgba(255,255,255,0.95)',
+                    background: 'rgba(255,255,255,0.9)',
                     backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(0,0,0,0.08)',
                     position: 'relative',
                     zIndex: 1,
+                    boxShadow: '0 8px 32px rgba(11, 82, 161, 0.15)',
                     transition: 'max-width 0.3s ease'
                 }}
             >
@@ -196,7 +197,7 @@ export default function LoginPage() {
                                 background: 'linear-gradient(135deg, #0b52a1 0%, #2e9bf4 100%)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 margin: '0 auto 16px',
-                                boxShadow: '0 8px 30px rgba(21,101,192,0.5)',
+                                boxShadow: '0 8px 30px rgba(11, 82, 161, 0.3)',
                             }}
                         >
                             <School sx={{ fontSize: 32, color: '#ffffff' }} />
