@@ -16,13 +16,15 @@ class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     student_number = serializers.CharField(source='profile.student_number', read_only=True)
     staff_id = serializers.CharField(source='profile.staff_id', read_only=True)
+    faculty = serializers.CharField(source='profile.faculty', read_only=True)
     department = serializers.CharField(source='profile.department', read_only=True)
+    year_of_study = serializers.IntegerField(source='profile.year_of_study', read_only=True)
     profile_picture = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'full_name', 'role', 
-                  'student_number', 'staff_id', 'department', 'profile_picture', 'is_staff', 'is_superuser', 'is_active']
+                  'student_number', 'staff_id', 'faculty', 'department', 'year_of_study', 'profile_picture', 'is_staff', 'is_superuser', 'is_active']
     
     def get_role(self, obj):
         try:
@@ -175,12 +177,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     role = serializers.CharField(write_only=True, required=False, default='student')
     student_number = serializers.CharField(write_only=True, required=False, allow_blank=True)
     staff_id = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    faculty = serializers.CharField(write_only=True, required=False, allow_blank=True)
     department = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    year_of_study = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'password', 'confirm_password', 
-                  'role', 'student_number', 'staff_id', 'department']
+                  'role', 'student_number', 'staff_id', 'faculty', 'department', 'year_of_study']
     
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -201,7 +205,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         role = validated_data.pop('role', 'student')
         student_number = validated_data.pop('student_number', '')
         staff_id = validated_data.pop('staff_id', '')
+        faculty = validated_data.pop('faculty', '')
         department = validated_data.pop('department', '')
+        year_of_study = validated_data.pop('year_of_study', None)
         validated_data.pop('confirm_password')
         
         # Determine staff status
@@ -219,7 +225,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             role=role,
             student_number=student_number,
             staff_id=staff_id,
-            department=department
+            faculty=faculty,
+            department=department,
+            year_of_study=year_of_study
         )
         return user
 
@@ -334,8 +342,15 @@ def user_profile_view(request):
         
         # Update UserProfile
         profile = user.profile
+        if 'faculty' in request.data:
+            profile.faculty = request.data.get('faculty')
         if 'department' in request.data:
             profile.department = request.data.get('department')
+        if 'year_of_study' in request.data:
+            try:
+                profile.year_of_study = int(request.data.get('year_of_study'))
+            except (ValueError, TypeError):
+                profile.year_of_study = None
             
         if 'profile_picture' in request.FILES:
             profile.profile_picture = request.FILES['profile_picture']
@@ -375,7 +390,13 @@ def user_detail_view(request, user_id):
         profile.role = user_data.get('role', profile.role)
         profile.student_number = user_data.get('student_number', profile.student_number)
         profile.staff_id = user_data.get('staff_id', profile.staff_id)
+        profile.faculty = user_data.get('faculty', profile.faculty)
         profile.department = user_data.get('department', profile.department)
+        if 'year_of_study' in user_data:
+            try:
+                profile.year_of_study = int(user_data['year_of_study'])
+            except (ValueError, TypeError):
+                pass
         profile.save()
         
         # Sync staff status if role changed

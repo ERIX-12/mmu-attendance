@@ -30,7 +30,31 @@ const CHART_OPTIONS = {
     },
 };
 
+const FACULTIES = [
+    'FACULTY OF SCIENCE, TECHNOLOGY AND INNOVATION',
+    'FACULTY OF EDUCATION',
+    'FACULTY OF BUSINESS AND HUMANITIES',
+    'FACULTY OF AGRICULTURE AND AGRO-ECOLOGY',
+    'FACULTY OF HEALTH SCIENCES',
+    'FACULTY OF ENGINEERING AND TECHNOLOGY'
+];
+
+const FACULTY_DEPARTMENTS = {
+    'FACULTY OF SCIENCE, TECHNOLOGY AND INNOVATION': ['Computer Science', 'Information Technology', 'Software Engineering', 'Data Science', 'Cybersecurity'],
+    'FACULTY OF EDUCATION': ['Educational Foundations', 'Curriculum and Instruction', 'Early Childhood Education', 'Special Needs Education'],
+    'FACULTY OF BUSINESS AND HUMANITIES': ['Business Administration', 'Accounting and Finance', 'Humanities', 'Economics'],
+    'FACULTY OF AGRICULTURE AND AGRO-ECOLOGY': ['Agriculture', 'Agro-Ecology', 'Agribusiness'],
+    'FACULTY OF HEALTH SCIENCES': ['Nursing', 'Public Health', 'Midwifery', 'Clinical Medicine'],
+    'FACULTY OF ENGINEERING AND TECHNOLOGY': ['Civil Engineering', 'Electrical Engineering', 'Mechanical Engineering']
+};
+
 function Overview({ courses, users }) {
+    const [stats, setStats] = useState([]);
+
+    useEffect(() => {
+        reportsApi.facultyStats().then(res => setStats(res.data)).catch(console.error);
+    }, []);
+
     const roleCount = (role) => users.filter((u) => u.role === role).length;
     const labels = courses.slice(0, 6).map((c) => c.course_code);
     const data = courses.slice(0, 6).map((c) => c.enrollment_count);
@@ -85,13 +109,31 @@ function Overview({ courses, users }) {
                     </CardContent>
                 </Card>
             </Grid>
+            {stats.map(faculty => (
+                <Grid item xs={12} md={6} key={faculty.faculty}>
+                    <Card>
+                        <CardHeader title={`${faculty.faculty.replace('FACULTY OF ', '')} Attendance`} />
+                        <CardContent>
+                            <Box sx={{ height: 260 }}>
+                                <Bar
+                                    options={{ ...CHART_OPTIONS, scales: { ...CHART_OPTIONS.scales, y: { ...CHART_OPTIONS.scales.y, max: 100 } } }}
+                                    data={{
+                                        labels: faculty.departments.map(d => d.department.length > 15 ? d.department.substring(0, 15) + '...' : d.department),
+                                        datasets: [{ label: 'Attendance Rate (%)', data: faculty.departments.map(d => d.attendance_rate), backgroundColor: 'rgba(67,160,71,0.7)', borderRadius: 6 }],
+                                    }}
+                                />
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            ))}
         </Grid>
     );
 }
 
 function CoursesTab({ courses, users, onRefresh }) {
     const [open, setOpen] = useState(false);
-    const [form, setForm] = useState({ course_code: '', name: '', credits: 3, lecturer: '', department: '' });
+    const [form, setForm] = useState({ course_code: '', name: '', credits: 3, lecturer: '', faculty: '', department: '' });
     const [saving, setSaving] = useState(false);
     const [editingCourse, setEditingCourse] = useState(null);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -100,7 +142,7 @@ function CoursesTab({ courses, users, onRefresh }) {
 
     const handleOpenCreate = () => {
         setEditingCourse(null);
-        setForm({ course_code: '', name: '', credits: 3, lecturer: '', department: '' });
+        setForm({ course_code: '', name: '', credits: 3, lecturer: '', faculty: '', department: '' });
         setOpen(true);
     };
 
@@ -111,6 +153,7 @@ function CoursesTab({ courses, users, onRefresh }) {
             name: course.name,
             credits: course.credits,
             lecturer: course.lecturer?.id || course.lecturer || '',
+            faculty: course.faculty || '',
             department: course.department || ''
         });
         setOpen(true);
@@ -130,6 +173,7 @@ function CoursesTab({ courses, users, onRefresh }) {
                 name: form.name,
                 credits: form.credits,
                 lecturer_id: form.lecturer,
+                faculty: form.faculty,
                 department: form.department
             };
             if (editingCourse) {
@@ -213,7 +257,20 @@ function CoursesTab({ courses, users, onRefresh }) {
                     <TextField label="Course Code" value={form.course_code} onChange={(e) => setForm((f) => ({ ...f, course_code: e.target.value }))} fullWidth required />
                     <TextField label="Course Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} fullWidth required />
                     <TextField label="Credits" type="number" value={form.credits} onChange={(e) => setForm((f) => ({ ...f, credits: e.target.value }))} fullWidth required />
-                    <TextField label="Department" value={form.department} onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))} fullWidth required />
+                    <FormControl fullWidth>
+                        <InputLabel>Faculty</InputLabel>
+                        <Select value={form.faculty} label="Faculty" onChange={(e) => setForm((f) => ({ ...f, faculty: e.target.value, department: '' }))}>
+                            <MenuItem value=""><em>None</em></MenuItem>
+                            {FACULTIES.map((fac) => <MenuItem key={fac} value={fac}>{fac}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth required disabled={!form.faculty}>
+                        <InputLabel>Department</InputLabel>
+                        <Select value={form.department} label="Department" onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}>
+                            <MenuItem value=""><em>None</em></MenuItem>
+                            {(FACULTY_DEPARTMENTS[form.faculty] || []).map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)}
+                        </Select>
+                    </FormControl>
                     <FormControl fullWidth required>
                         <InputLabel>Lecturer</InputLabel>
                         <Select value={form.lecturer} label="Lecturer" onChange={(e) => setForm((f) => ({ ...f, lecturer: e.target.value }))}>
@@ -254,7 +311,7 @@ function UsersTab({ users, onRefresh }) {
     const [form, setForm] = useState({
         username: '', email: '', first_name: '', last_name: '',
         password: 'Temp@12345', confirm_password: 'Temp@12345',
-        role: 'student', student_number: '', staff_id: '', department: ''
+        role: 'student', student_number: '', staff_id: '', faculty: '', department: '', year_of_study: ''
     });
     const [saving, setSaving] = useState(false);
 
@@ -266,7 +323,7 @@ function UsersTab({ users, onRefresh }) {
         setForm({
             username: '', email: '', first_name: '', last_name: '',
             password: 'Temp@12345', confirm_password: 'Temp@12345',
-            role: 'student', student_number: '', staff_id: '', department: ''
+            role: 'student', student_number: '', staff_id: '', faculty: '', department: '', year_of_study: ''
         });
         setOpen(true);
     };
@@ -279,7 +336,9 @@ function UsersTab({ users, onRefresh }) {
             role: user.role,
             student_number: user.student_number || '',
             staff_id: user.staff_id || '',
-            department: user.department || ''
+            faculty: user.faculty || '',
+            department: user.department || '',
+            year_of_study: user.year_of_study || ''
         });
         setOpen(true);
     };
@@ -386,9 +445,35 @@ function UsersTab({ users, onRefresh }) {
                             {['admin', 'lecturer', 'student'].map((r) => <MenuItem key={r} value={r}>{r}</MenuItem>)}
                         </Select>
                     </FormControl>
-                    {form.role === 'student' && <TextField label="Student Number" value={form.student_number} onChange={(e) => setForm((f) => ({ ...f, student_number: e.target.value }))} fullWidth />}
+                    {form.role === 'student' && (
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            <TextField label="Student Number" value={form.student_number} onChange={(e) => setForm((f) => ({ ...f, student_number: e.target.value }))} fullWidth />
+                            <FormControl fullWidth>
+                                <InputLabel>Year of Study</InputLabel>
+                                <Select value={form.year_of_study} label="Year of Study" onChange={(e) => setForm((f) => ({ ...f, year_of_study: e.target.value }))}>
+                                    <MenuItem value=""><em>None</em></MenuItem>
+                                    {[1, 2, 3, 4, 5, 6].map(year => (
+                                        <MenuItem key={year} value={year}>Year {year}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Box>
+                    )}
                     {form.role === 'lecturer' && <TextField label="Staff ID" value={form.staff_id} onChange={(e) => setForm((f) => ({ ...f, staff_id: e.target.value }))} fullWidth />}
-                    <TextField label="Department" value={form.department} onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))} fullWidth />
+                    <FormControl fullWidth>
+                        <InputLabel>Faculty</InputLabel>
+                        <Select value={form.faculty} label="Faculty" onChange={(e) => setForm((f) => ({ ...f, faculty: e.target.value, department: '' }))}>
+                            <MenuItem value=""><em>None</em></MenuItem>
+                            {FACULTIES.map((fac) => <MenuItem key={fac} value={fac}>{fac}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth disabled={!form.faculty}>
+                        <InputLabel>Department</InputLabel>
+                        <Select value={form.department} label="Department" onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}>
+                            <MenuItem value=""><em>None</em></MenuItem>
+                            {(FACULTY_DEPARTMENTS[form.faculty] || []).map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)}
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpen(false)}>Cancel</Button>
@@ -593,6 +678,75 @@ function ReportsTab({ courses }) {
     );
 }
 
+function FacultiesTab() {
+    const [stats, setStats] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchStats = async () => {
+        try {
+            const { data } = await reportsApi.facultyStats();
+            setStats(data);
+        } catch {
+            toast.error('Failed to load faculty stats');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
+
+    if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+
+    return (
+        <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>Faculty & Department Attendance Overview</Typography>
+            {stats.map((faculty) => (
+                <Card key={faculty.faculty} sx={{ mb: 3 }}>
+                    <CardHeader
+                        title={faculty.faculty}
+                        subheader={`Overall Attendance: ${faculty.attendance_rate}% | Total Enrollments: ${faculty.total_enrollments} | Total Sessions: ${faculty.total_sessions}`}
+                    />
+                    <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{ fontWeight: 700 }}>Department</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }}>Sessions</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }}>Total Enrollments</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }}>Attended</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }}>Attendance Rate</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {faculty.departments.map((dept) => (
+                                    <TableRow key={dept.department}>
+                                        <TableCell>{dept.department}</TableCell>
+                                        <TableCell>{dept.total_sessions}</TableCell>
+                                        <TableCell>{dept.total_enrollments}</TableCell>
+                                        <TableCell>{dept.total_attended}</TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label={`${dept.attendance_rate}%`}
+                                                size="small"
+                                                color={dept.attendance_rate >= 80 ? 'success' : (dept.attendance_rate >= 60 ? 'warning' : 'error')}
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Card>
+            ))}
+            {stats.length === 0 && (
+                <Typography color="text.secondary">No attendance data available yet.</Typography>
+            )}
+        </Box>
+    );
+}
+
 export default function AdminDashboard() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -624,6 +778,7 @@ export default function AdminDashboard() {
         { label: 'Users', path: '/admin/users' },
         { label: 'Sessions', path: '/admin/sessions' },
         { label: 'Reports', path: '/admin/reports' },
+        { label: 'Faculties & Depts', path: '/admin/faculties' },
     ];
 
     const currentTab = tabs.findIndex(t => t.path === location.pathname) === -1
@@ -653,6 +808,7 @@ export default function AdminDashboard() {
                     <Route path="users" element={<UsersTab users={users} onRefresh={fetchAll} />} />
                     <Route path="sessions" element={<AllSessionsTab />} />
                     <Route path="reports" element={<ReportsTab courses={courses} />} />
+                    <Route path="faculties" element={<FacultiesTab />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Routes>
             )}

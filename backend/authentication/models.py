@@ -12,7 +12,9 @@ class UserProfile(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
     student_number = models.CharField(max_length=50, blank=True)
     staff_id = models.CharField(max_length=50, blank=True)
+    faculty = models.CharField(max_length=200, blank=True)
     department = models.CharField(max_length=100, blank=True)
+    year_of_study = models.IntegerField(null=True, blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
     
     def __str__(self):

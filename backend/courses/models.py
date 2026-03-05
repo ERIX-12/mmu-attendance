@@ -7,6 +7,7 @@ class Course(models.Model):
     code = models.CharField(max_length=20, unique=True)
     description = models.TextField(blank=True)
     credits = models.IntegerField(default=3)
+    faculty = models.CharField(max_length=200, blank=True)
     department = models.CharField(max_length=200, blank=True)
     lecturer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses_taught')
     students = models.ManyToManyField(User, related_name='courses_enrolled', blank=True)

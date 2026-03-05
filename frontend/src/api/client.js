@@ -117,6 +117,7 @@ export const reportsApi = {
         api.get(`/reports/${courseId}/pdf/`, { params, responseType: 'blob' }),
     belowThreshold: (courseId, params) =>
         api.get(`/reports/${courseId}/below-threshold/`, { params }),
+    facultyStats: () => api.get('/reports/faculties/'),
 };
 
 export default api;

@@ -11,13 +11,31 @@ import toast from 'react-hot-toast';
 import { authApi } from '../api/client';
 import useAuthStore from '../context/authStore';
 
+const FACULTIES = [
+    'FACULTY OF SCIENCE, TECHNOLOGY AND INNOVATION',
+    'FACULTY OF EDUCATION',
+    'FACULTY OF BUSINESS AND HUMANITIES',
+    'FACULTY OF AGRICULTURE AND AGRO-ECOLOGY',
+    'FACULTY OF HEALTH SCIENCES',
+    'FACULTY OF ENGINEERING AND TECHNOLOGY'
+];
+
+const FACULTY_DEPARTMENTS = {
+    'FACULTY OF SCIENCE, TECHNOLOGY AND INNOVATION': ['Computer Science', 'Information Technology', 'Software Engineering', 'Data Science', 'Cybersecurity'],
+    'FACULTY OF EDUCATION': ['Educational Foundations', 'Curriculum and Instruction', 'Early Childhood Education', 'Special Needs Education'],
+    'FACULTY OF BUSINESS AND HUMANITIES': ['Business Administration', 'Accounting and Finance', 'Humanities', 'Economics'],
+    'FACULTY OF AGRICULTURE AND AGRO-ECOLOGY': ['Agriculture', 'Agro-Ecology', 'Agribusiness'],
+    'FACULTY OF HEALTH SCIENCES': ['Nursing', 'Public Health', 'Midwifery', 'Clinical Medicine'],
+    'FACULTY OF ENGINEERING AND TECHNOLOGY': ['Civil Engineering', 'Electrical Engineering', 'Mechanical Engineering']
+};
+
 export default function LoginPage() {
     const [tabIndex, setTabIndex] = useState(0);
     const [form, setForm] = useState({
         username: '', password: '',
         first_name: '', last_name: '', email: '',
         confirm_password: '', role: 'student',
-        student_number: '', staff_id: ''
+        student_number: '', staff_id: '', year_of_study: '', faculty: '', department: ''
     });
     const [showPass, setShowPass] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -74,8 +92,10 @@ export default function LoginPage() {
                 password: form.password,
                 confirm_password: form.confirm_password,
                 role: form.role,
-                ...(form.role === 'student' ? { student_number: form.student_number } : {}),
+                ...(form.role === 'student' ? { student_number: form.student_number, year_of_study: form.year_of_study } : {}),
                 ...(form.role === 'lecturer' ? { staff_id: form.staff_id } : {}),
+                faculty: form.faculty,
+                department: form.department,
             };
             const { data } = await authApi.register(registerData);
             useAuthStore.getState().setTokens(data.access, data.refresh);
@@ -289,11 +309,37 @@ export default function LoginPage() {
                                 </Select>
                             </FormControl>
 
+                            <FormControl fullWidth required>
+                                <InputLabel>Faculty</InputLabel>
+                                <Select name="faculty" value={form.faculty} label="Faculty" onChange={(e) => setForm((f) => ({ ...f, faculty: e.target.value, department: '' }))}>
+                                    <MenuItem value=""><em>None</em></MenuItem>
+                                    {FACULTIES.map((fac) => <MenuItem key={fac} value={fac}>{fac}</MenuItem>)}
+                                </Select>
+                            </FormControl>
+
+                            <FormControl fullWidth required disabled={!form.faculty}>
+                                <InputLabel>Department</InputLabel>
+                                <Select name="department" value={form.department} label="Department" onChange={handleChange}>
+                                    <MenuItem value=""><em>None</em></MenuItem>
+                                    {(FACULTY_DEPARTMENTS[form.faculty] || []).map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)}
+                                </Select>
+                            </FormControl>
+
                             {form.role === 'student' && (
-                                <TextField
-                                    label="Student Number" name="student_number" value={form.student_number} onChange={handleChange} fullWidth required
-                                    InputProps={{ startAdornment: <InputAdornment position="start"><Badge fontSize="small" /></InputAdornment> }}
-                                />
+                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                    <TextField
+                                        label="Student Number" name="student_number" value={form.student_number} onChange={handleChange} fullWidth required
+                                        InputProps={{ startAdornment: <InputAdornment position="start"><Badge fontSize="small" /></InputAdornment> }}
+                                    />
+                                    <FormControl fullWidth required>
+                                        <InputLabel>Year of Study</InputLabel>
+                                        <Select name="year_of_study" value={form.year_of_study} label="Year of Study" onChange={handleChange}>
+                                            {[1, 2, 3, 4, 5, 6].map(year => (
+                                                <MenuItem key={year} value={year}>Year {year}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Box>
                             )}
 
                             {form.role === 'lecturer' && (
