@@ -377,27 +377,6 @@ export default function LoginPage() {
                         </Box>
                     )}
 
-                    {/* Demo credentials hint */}
-                    <Box
-                        sx={{
-                            mt: 3, p: 1.5, borderRadius: 2,
-                            background: alpha('#0b52a1', 0.05),
-                            border: '1px solid rgba(21,101,192,0.2)',
-                        }}
-                    >
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
-                            Demo Credentials:
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                            Admin: admin / Admin@123
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                            Lecturer: lec_okello / Lecturer@123
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                            Student: stu_amanya / Student@123
-                        </Typography>
-                    </Box>
                 </CardContent>
             </Card>
 

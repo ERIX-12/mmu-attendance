@@ -168,6 +168,8 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Allow all origins in development
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
