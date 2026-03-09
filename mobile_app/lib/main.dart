@@ -222,10 +222,11 @@ class _SplashRouterState extends State<_SplashRouter>
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.school_rounded,
-                          size: 64,
-                          color: Colors.white,
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 32),

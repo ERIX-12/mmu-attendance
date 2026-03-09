@@ -4,7 +4,7 @@ class AppConstants {
   // Change this to your backend URL when running on a real device
   // For emulator: use http://10.0.2.2:8000
   // For physical device on same WiFi: use http://YOUR_PC_IP:8000
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'http://10.32.195.116:8000';
   static const String apiUrl = '$baseUrl/api';
 
   // Auth endpoints
