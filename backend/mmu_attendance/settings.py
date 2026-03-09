@@ -92,8 +92,13 @@ DATABASES = {
 }
 
 import dj_database_url
-if os.environ.get('DATABASE_URL'):
-    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
+    DATABASES['default']['CONN_MAX_AGE'] = 600
+    # Enable SSL for production DB
+    if not DEBUG:
+        DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
 
 # Password validation
@@ -202,9 +207,17 @@ CSRF_TRUSTED_ORIGINS = [
 # Production settings
 import os
 
+# Railway specific
 if os.environ.get('RAILWAY_ENVIRONMENT'):
     DEBUG = False
     ALLOWED_HOSTS = ['*']
     CORS_ALLOWED_ORIGINS = ["https://your-vercel-app.vercel.app"]
+
+# Render specific
+if os.environ.get('RENDER'):
+    DEBUG = False
+    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME', '*')]
+    # Add your Vercel URL to CORS if you have it
+    # CORS_ALLOWED_ORIGINS = ["https://your-app.vercel.app"]
 
 CORS_ALLOW_CREDENTIALS = True
