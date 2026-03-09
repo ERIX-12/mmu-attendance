@@ -26,7 +26,7 @@ class AppConstants {
   // App info
   static const String appName = 'MMU Attendance';
   static const String appVersion = '1.0.0';
-  static const String universityName = 'Multimedia University';
+  static const String universityName = 'Mountains of the Moon University';
 }
 
 class AppColors {

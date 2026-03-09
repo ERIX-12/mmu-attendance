@@ -435,7 +435,7 @@ class _LoginScreenState extends State<LoginScreen>
     return Column(
       children: [
         Text(
-          'BY MULTIMEDIA UNIVERSITY',
+          'BY MOUNTAINS OF THE MOON UNIVERSITY',
           style: TextStyle(
             color: Colors.white.withOpacity(0.5),
             fontSize: 10,
