@@ -92,11 +92,10 @@ DATABASES = {
 }
 
 import dj_database_url
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL:
-    DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
-    DATABASES['default']['CONN_MAX_AGE'] = 600
-    # Enable SSL for production DB
+db_from_env = dj_database_url.config(conn_max_age=600)
+if db_from_env:
+    DATABASES['default'].update(db_from_env)
+    # Enable SSL for production DB on Render/Cloud
     if not DEBUG:
         DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
