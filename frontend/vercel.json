@@ -14,11 +14,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://your-railway-app.railway.app/api/$1"
-    }
   ]
 }
