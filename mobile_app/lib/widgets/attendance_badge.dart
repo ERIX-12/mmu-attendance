@@ -16,24 +16,30 @@ class AttendanceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _color.withOpacity(0.1),
-        border: Border.all(color: _color.withOpacity(0.4), width: 2),
-      ),
-      child: Center(
-        child: Text(
-          '$percentage%',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: _color,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox(
+          width: 58,
+          height: 58,
+          child: CircularProgressIndicator(
+            value: percentage / 100,
+            strokeWidth: 5,
+            backgroundColor: _color.withOpacity(0.12),
+            valueColor: AlwaysStoppedAnimation<Color>(_color),
+            strokeCap: StrokeCap.round,
           ),
         ),
-      ),
+        Text(
+          '$percentage%',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+            letterSpacing: -0.5,
+          ),
+        ),
+      ],
     );
   }
 }

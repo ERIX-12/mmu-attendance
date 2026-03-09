@@ -53,21 +53,31 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        centerTitle: true,
+        backgroundColor: AppColors.background,
         elevation: 0,
         title: const Text(
           'Attendance Records',
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-            fontSize: 22,
+            fontWeight: FontWeight.w900,
+            fontSize: 24,
+            letterSpacing: -0.5,
           ),
         ),
         actions: [
           IconButton(
             onPressed: _loadRecords,
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 20),
+            ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: _isLoading
@@ -77,17 +87,29 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               : RefreshIndicator(
                   onRefresh: _loadRecords,
                   color: AppColors.primary,
+                  backgroundColor: Colors.white,
+                  strokeWidth: 3,
                   child: CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
                     slivers: [
-                      SliverToBoxAdapter(child: _buildSummaryHeader()),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+                          child: _buildSummaryHeader(),
+                        ),
+                      ),
                       _records.isEmpty
-                          ? SliverToBoxAdapter(child: _buildEmpty())
-                          : SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                (_, i) => _buildRecordCard(_records[i]),
-                                childCount: _records.length,
+                          ? SliverFillRemaining(hasScrollBody: false, child: _buildEmpty())
+                          : SliverPadding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (_, i) => _buildRecordCard(_records[i]),
+                                  childCount: _records.length,
+                                ),
                               ),
                             ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 30)),
                     ],
                   ),
                 ),
@@ -96,34 +118,40 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
 
   Widget _buildSummaryHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: _summaryChip(
-              'Present',
-              '$_presentCount',
-              AppColors.success,
-              Icons.check_circle_rounded,
-            ),
+          _summaryChip(
+            'Present',
+            '$_presentCount',
+            Colors.white,
+            Icons.check_circle_rounded,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _summaryChip(
-              'Absent',
-              '$_absentCount',
-              AppColors.error,
-              Icons.cancel_rounded,
-            ),
+          Container(height: 40, width: 1, color: Colors.white.withOpacity(0.2)),
+          _summaryChip(
+            'Absent',
+            '$_absentCount',
+            Colors.white,
+            Icons.cancel_rounded,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _summaryChip(
-              'Total',
-              '${_records.length}',
-              AppColors.primary,
-              Icons.list_alt_rounded,
-            ),
+          Container(height: 40, width: 1, color: Colors.white.withOpacity(0.2)),
+          _summaryChip(
+            'Total',
+            '${_records.length}',
+            Colors.white,
+            Icons.list_alt_rounded,
           ),
         ],
       ),
@@ -131,105 +159,125 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   }
 
   Widget _summaryChip(String label, String value, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: color,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color.withOpacity(0.8), size: 16),
+            const SizedBox(width: 6),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                color: color,
+                letterSpacing: -0.5,
+              ),
             ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 10,
+            color: color.withOpacity(0.6),
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1,
           ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: color.withOpacity(0.8),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildRecordCard(AttendanceRecordModel record) {
     final isPresent = record.isPresent;
+    final statusColor = isPresent ? AppColors.success : AppColors.error;
+    
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: AppColors.softShadow,
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: (isPresent ? AppColors.success : AppColors.error).withOpacity(0.1),
-          ),
-          child: Icon(
-            isPresent ? Icons.check_rounded : Icons.close_rounded,
-            color: isPresent ? AppColors.success : AppColors.error,
-            size: 22,
-          ),
-        ),
-        title: Text(
-          '${record.courseCode} — ${record.courseName}',
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
           children: [
-            const SizedBox(height: 2),
-            Text(
-              record.date,
-              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(
+                isPresent ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                color: statusColor,
+                size: 28,
+              ),
             ),
-            Text(
-              DateFormat('MMM d, y · h:mm a').format(record.timestamp.toLocal()),
-              style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    record.courseCode,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: statusColor,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    record.courseName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textMuted.withOpacity(0.6)),
+                      const SizedBox(width: 4),
+                      Text(
+                        record.date,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(width: 4, height: 4, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.textMuted.withOpacity(0.3))),
+                      const SizedBox(width: 8),
+                      Icon(Icons.access_time_rounded, size: 12, color: AppColors.textMuted.withOpacity(0.6)),
+                      const SizedBox(width: 4),
+                      Text(
+                        DateFormat('h:mm a').format(record.timestamp.toLocal()),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: (isPresent ? AppColors.success : AppColors.error).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            isPresent ? 'Present' : 'Absent',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: isPresent ? AppColors.success : AppColors.error,
-            ),
-          ),
         ),
       ),
     );

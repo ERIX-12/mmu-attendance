@@ -10,6 +10,7 @@ import '../auth/login_screen.dart';
 import 'lecturer_sessions_screen.dart';
 import 'create_session_screen.dart';
 import 'lecturer_profile_screen.dart';
+import 'session_detail_screen.dart';
 
 class LecturerDashboard extends StatefulWidget {
   const LecturerDashboard({super.key});
@@ -37,17 +38,24 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
       ),
       bottomNavigationBar: _buildBottomNav(),
-      floatingActionButton: _currentIndex == 1
+      floatingActionButton: (_currentIndex == 0 || _currentIndex == 1)
           ? FloatingActionButton.extended(
               onPressed: () => setState(() => _currentIndex = 2),
               backgroundColor: AppColors.primary,
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text('New Session', style: TextStyle(color: Colors.white)),
+              foregroundColor: Colors.white,
+              elevation: 12,
+              icon: const Icon(Icons.add_rounded, size: 28),
+              label: const Text(
+                'NEW SESSION', 
+                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 13),
+              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             )
           : null,
     );
@@ -55,27 +63,33 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
 
   Widget _buildBottomNav() {
     return Container(
+      margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _navItem(0, Icons.dashboard_rounded, 'Dashboard'),
-              _navItem(1, Icons.list_alt_rounded, 'Sessions'),
-              _navItem(2, Icons.add_circle_rounded, 'Create'),
-              _navItem(3, Icons.person_rounded, 'Profile'),
-            ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _navItem(0, Icons.grid_view_rounded, 'Home'),
+                _navItem(1, Icons.view_list_rounded, 'Sessions'),
+                _navItem(2, Icons.add_box_rounded, 'Create'),
+                _navItem(3, Icons.person_rounded, 'Profile'),
+              ],
+            ),
           ),
         ),
       ),
@@ -86,30 +100,35 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
     final isSelected = _currentIndex == index;
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
+      behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.fastOutSlowIn,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+          borderRadius: BorderRadius.circular(22),
         ),
-        child: Column(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : Colors.grey[400],
-              size: 22,
+              color: isSelected ? AppColors.primary : AppColors.textMuted.withOpacity(0.6),
+              size: 24,
             ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.primary : Colors.grey[400],
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primary,
+                  letterSpacing: 0.2,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -152,10 +171,12 @@ class _LecturerHomeState extends State<_LecturerHome> {
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -170,155 +191,158 @@ class _LecturerHomeState extends State<_LecturerHome> {
       body: RefreshIndicator(
         onRefresh: _loadData,
         color: AppColors.primary,
+        displacement: 40,
         child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
           slivers: [
             SliverAppBar(
-              expandedHeight: 180,
+              expandedHeight: 280,
               pinned: true,
+              stretch: true,
               backgroundColor: AppColors.primary,
+              elevation: 0,
+              centerTitle: false,
+              title: _currentIndexTitle(),
               flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: Colors.white.withOpacity(0.2),
-                                child: Text(
-                                  user?.initials ?? 'L',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Hello, ${user?.firstName ?? 'Lecturer'}! 👋',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    Text(
-                                      user?.department ?? user?.faculty ?? '',
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.75),
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  (user?.role ?? 'lecturer').toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            '${_sessions.length} Total Sessions',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          Text(
-                            '$_activeSessions active · $_completedSessions completed',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
+                stretchModes: const [StretchMode.zoomBackground],
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.primaryGradient,
                       ),
                     ),
-                  ),
+                    Positioned(
+                      top: -60,
+                      right: -60,
+                      child: CircleAvatar(
+                        radius: 140,
+                        backgroundColor: Colors.white.withOpacity(0.05),
+                      ),
+                    ),
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 40),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 30,
+                                    backgroundColor: Colors.white.withOpacity(0.15),
+                                    child: Text(
+                                      user?.initials ?? 'L',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'HELLO,',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.6),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 2,
+                                        ),
+                                      ),
+                                      Text(
+                                        user?.firstName ?? 'Lecturer',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+                              ),
+                              child: Row(
+                                children: [
+                                  _quickStat('SESSIONS', '${_sessions.length}'),
+                                  _statDivider(),
+                                  _quickStat('ACTIVE', '$_activeSessions'),
+                                  _statDivider(),
+                                  _quickStat('STUDENTS', '---'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Stats
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: StatCard(
-                            icon: Icons.radio_button_checked_rounded,
-                            title: 'Active',
-                            value: '$_activeSessions',
-                            subtitle: 'Live Sessions',
-                            color: AppColors.success,
+                        const Text(
+                          'Recent Activity',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: StatCard(
-                            icon: Icons.check_circle_outline_rounded,
-                            title: 'Completed',
-                            value: '$_completedSessions',
-                            subtitle: 'Sessions',
-                            color: AppColors.primary,
-                          ),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text('View All', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-
-                    // Recent sessions
-                    const Text(
-                      'Recent Sessions',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
 
                     if (_isLoading)
                       const Center(
-                          child: Padding(
-                        padding: EdgeInsets.all(40),
-                        child: CircularProgressIndicator(color: AppColors.primary),
-                      ))
+                        child: Padding(
+                          padding: EdgeInsets.all(60),
+                          child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
+                        ),
+                      )
                     else if (_error != null)
                       _buildError()
                     else if (_sessions.isEmpty)
                       _buildEmpty()
                     else
                       ..._sessions.take(5).map((s) => _buildSessionCard(s)),
-
-                    const SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -329,81 +353,34 @@ class _LecturerHomeState extends State<_LecturerHome> {
     );
   }
 
-  Widget _buildSessionCard(AttendanceSessionModel session) {
-    Color statusColor;
-    IconData statusIcon;
-    switch (session.status) {
-      case 'active':
-        statusColor = AppColors.success;
-        statusIcon = Icons.radio_button_checked_rounded;
-        break;
-      case 'completed':
-        statusColor = Colors.grey;
-        statusIcon = Icons.check_circle_rounded;
-        break;
-      default:
-        statusColor = AppColors.warning;
-        statusIcon = Icons.schedule_rounded;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+  Widget? _currentIndexTitle() {
+    return const Text(
+      'MMU ATTENDANCE',
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w900,
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        letterSpacing: 3,
       ),
-      child: Row(
+    );
+  }
+
+  Widget _quickStat(String label, String value) {
+    return Expanded(
+      child: Column(
         children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(statusIcon, color: statusColor, size: 24),
+          Text(
+            value,
+            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  session.title.isNotEmpty ? session.title : 'Session',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  '${session.courseCode} · ${session.date}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              session.status.toUpperCase(),
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: statusColor,
-              ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.5),
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
             ),
           ),
         ],
@@ -411,18 +388,122 @@ class _LecturerHomeState extends State<_LecturerHome> {
     );
   }
 
+  Widget _statDivider() => Container(width: 1, height: 30, color: Colors.white.withOpacity(0.1));
+
+  Widget _buildSessionCard(AttendanceSessionModel session) {
+    Color statusColor;
+    IconData statusIcon;
+    switch (session.status) {
+      case 'active':
+        statusColor = AppColors.success;
+        statusIcon = Icons.sensors_rounded;
+        break;
+      case 'completed':
+        statusColor = AppColors.textMuted;
+        statusIcon = Icons.task_alt_rounded;
+        break;
+      default:
+        statusColor = AppColors.warning;
+        statusIcon = Icons.hourglass_top_rounded;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: AppColors.softShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SessionDetailScreen(session: session),
+              ),
+            ).then((_) => _loadData());
+          },
+          borderRadius: BorderRadius.circular(28),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Icon(statusIcon, color: statusColor, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${session.courseCode} · ${session.date}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textMuted.withOpacity(0.6),
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        session.title.isNotEmpty ? session.title : 'Attendance Session',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmpty() {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(Icons.event_note_rounded, size: 56, color: Colors.grey),
-            SizedBox(height: 12),
-            Text(
-              'No sessions yet.\nCreate one using the + button below.',
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: AppColors.softShadow,
+              ),
+              child: Icon(Icons.event_note_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'No active sessions found.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Create your first attendance session using the plus button.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -441,7 +522,10 @@ class _LecturerHomeState extends State<_LecturerHome> {
             icon: const Icon(Icons.refresh),
             label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           ),
         ],
       ),

@@ -64,36 +64,65 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        centerTitle: true,
+        backgroundColor: AppColors.background,
         elevation: 0,
         title: const Text(
           'My Sessions',
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w900,
             fontSize: 22,
+            letterSpacing: -0.5,
           ),
         ),
         actions: [
           IconButton(
-            onPressed: _loadSessions,
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
+            onPressed: _isLoading ? null : _loadSessions,
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 20),
+            ),
           ),
+          const SizedBox(width: 8),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppColors.primary,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: Colors.grey,
-          tabs: const [
-            Tab(text: 'All'),
-            Tab(text: 'Active'),
-            Tab(text: 'Completed'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+              ],
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: AppColors.primary,
+              ),
+              labelColor: Colors.white,
+              unselectedLabelColor: AppColors.textMuted,
+              labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              tabs: const [
+                Tab(text: 'ALL'),
+                Tab(text: 'ACTIVE'),
+                Tab(text: 'DONE'),
+              ],
+            ),
+          ),
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3))
           : _error != null
               ? _buildError()
               : TabBarView(
@@ -111,24 +140,44 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
     final filtered = _getFiltered(status);
     if (filtered.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.event_note_rounded, size: 56, color: Colors.grey),
-            const SizedBox(height: 12),
-            Text(
-              status == null ? 'No sessions yet' : 'No $status sessions',
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(48),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: AppColors.softShadow,
+                ),
+                child: Icon(Icons.event_note_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                status == null ? 'No sessions created yet.' : 'No $status sessions found.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Create a session to start tracking attendance.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
         ),
       );
     }
     return RefreshIndicator(
       onRefresh: _loadSessions,
       color: AppColors.primary,
+      displacement: 20,
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 100),
         itemCount: filtered.length,
         itemBuilder: (_, i) => _buildSessionCard(filtered[i]),
       ),
@@ -137,175 +186,147 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
 
   Widget _buildSessionCard(AttendanceSessionModel session) {
     Color statusColor;
-    String statusLabel;
     IconData statusIcon;
 
     switch (session.status) {
       case 'active':
         statusColor = AppColors.success;
-        statusLabel = 'LIVE';
-        statusIcon = Icons.radio_button_checked_rounded;
+        statusIcon = Icons.sensors_rounded;
         break;
       case 'completed':
-        statusColor = Colors.grey;
-        statusLabel = 'DONE';
-        statusIcon = Icons.check_circle_rounded;
+        statusColor = AppColors.textMuted;
+        statusIcon = Icons.task_alt_rounded;
         break;
       default:
         statusColor = AppColors.warning;
-        statusLabel = 'PENDING';
-        statusIcon = Icons.schedule_rounded;
+        statusIcon = Icons.hourglass_top_rounded;
     }
 
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => SessionDetailScreen(session: session),
-        ),
-      ).then((_) => _loadSessions()),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: AppColors.softShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SessionDetailScreen(session: session),
             ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Top bar for active sessions
-            if (session.isActive)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          ).then((_) => _loadSessions()),
+          borderRadius: BorderRadius.circular(28),
+          child: Column(
+            children: [
+              if (session.isActive)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.12),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'LIVE SESSION',
+                        style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.success,
-                        shape: BoxShape.circle,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(statusIcon, color: statusColor, size: 24),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                session.courseCode,
+                                style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                session.title.isNotEmpty ? session.title : 'Attendance Session',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary, letterSpacing: -0.5),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'Session is LIVE — QR active',
-                      style: TextStyle(
-                        color: AppColors.success,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        _sessionInfoTile(Icons.calendar_today_rounded, session.date),
+                        const SizedBox(width: 20),
+                        _sessionInfoTile(Icons.access_time_rounded, '${session.startTime} - ${session.endTime}'),
+                      ],
+                    ),
+                    if (session.topic != null && session.topic!.isNotEmpty) ... [
+                      const SizedBox(height: 12),
+                      _sessionInfoTile(Icons.topic_rounded, session.topic!),
+                    ],
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'MANAGE SESSION',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 1),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 14),
+                      ],
                     ),
                   ],
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              session.courseCode,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Text(
-                              session.title.isNotEmpty ? session.title : 'Session',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(statusIcon, size: 12, color: statusColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              statusLabel,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: statusColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today_rounded, size: 14, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
-                      Text(session.date, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-                      const SizedBox(width: 12),
-                      Icon(Icons.access_time_rounded, size: 14, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${session.startTime} - ${session.endTime}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                  if (session.venue != null && session.venue!.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Row(
-                        children: [
-                          Icon(Icons.location_on_rounded, size: 14, color: Colors.grey[500]),
-                          const SizedBox(width: 4),
-                          Text(session.venue!, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: 10),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Tap to manage →',
-                        style: TextStyle(fontSize: 12, color: AppColors.primary),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _sessionInfoTile(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: AppColors.textMuted.withOpacity(0.5)),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: TextStyle(fontSize: 12, color: AppColors.textMuted.withOpacity(0.8), fontWeight: FontWeight.w600),
+        ),
+      ],
     );
   }
 
@@ -314,13 +335,18 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.cloud_off_rounded, size: 56, color: Colors.grey),
-          const SizedBox(height: 12),
+          const Icon(Icons.cloud_off_rounded, size: 56, color: AppColors.textMuted),
+          const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: _loadSessions,
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+            label: const Text('RETRY'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
           ),
         ],
       ),

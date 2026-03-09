@@ -14,31 +14,43 @@ class StudentProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        centerTitle: true,
+        backgroundColor: AppColors.background,
         elevation: 0,
         title: const Text(
-          'Profile',
+          'My Profile',
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-            fontSize: 22,
+            fontWeight: FontWeight.w900,
+            fontSize: 24,
+            letterSpacing: -0.5,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: Colors.red),
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Sign Out'),
-                  content: const Text('Are you sure you want to sign out?'),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  backgroundColor: Colors.white,
+                  surfaceTintColor: Colors.white,
+                  title: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.w900)),
+                  content: const Text('Are you sure you want to end your session?', style: TextStyle(fontWeight: FontWeight.w500)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                     TextButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Stay', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700)),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('Sign Out', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w800)),
+                      ),
                     ),
                   ],
                 ),
@@ -53,67 +65,118 @@ class StudentProfileScreen extends StatelessWidget {
                 }
               }
             },
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.logout_rounded, color: AppColors.error, size: 18),
+            ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
-            // Avatar
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Text(
-                  user?.initials ?? '?',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w700,
+            const SizedBox(height: 20),
+            // Avatar Section
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 130,
+                  height: 130,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 8),
                   ),
                 ),
-              ),
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      user?.initials ?? '?',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 5,
+                  right: 5,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                      boxShadow: AppColors.softShadow,
+                    ),
+                    child: const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               user?.fullName ?? 'Student',
               style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
                 color: AppColors.textPrimary,
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
+                color: AppColors.primary.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(100),
               ),
               child: Text(
                 (user?.role ?? 'student').toUpperCase(),
                 style: const TextStyle(
                   color: AppColors.primary,
                   fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
                 ),
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 40),
             _buildInfoCard(user),
+            const SizedBox(height: 40),
+            // Footnote
+            Text(
+              'MMU Student Attendance System',
+              style: TextStyle(
+                color: AppColors.textMuted.withOpacity(0.5),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -123,41 +186,36 @@ class StudentProfileScreen extends StatelessWidget {
   Widget _buildInfoCard(user) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: AppColors.softShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Account Information',
+            'ACCOUNT DETAILS',
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textMuted,
+              letterSpacing: 1.2,
             ),
           ),
-          const SizedBox(height: 16),
-          _infoRow(Icons.person_outline_rounded, 'Username', user?.username ?? '—'),
+          const SizedBox(height: 24),
+          _infoRow(Icons.alternate_email_rounded, 'Username', user?.username ?? '—'),
           _divider(),
-          _infoRow(Icons.email_outlined, 'Email', user?.email ?? '—'),
+          _infoRow(Icons.email_rounded, 'Email Address', user?.email ?? '—'),
           _divider(),
-          _infoRow(Icons.badge_outlined, 'Student Number', user?.studentNumber ?? '—'),
+          _infoRow(Icons.badge_rounded, 'Student Identity', user?.studentNumber ?? '—'),
           _divider(),
-          _infoRow(Icons.school_outlined, 'Faculty', user?.faculty ?? '—'),
+          _infoRow(Icons.school_rounded, 'Faculty', user?.faculty ?? '—'),
           _divider(),
-          _infoRow(Icons.business_outlined, 'Department', user?.department ?? '—'),
+          _infoRow(Icons.apartment_rounded, 'Department', user?.department ?? '—'),
           _divider(),
-          _infoRow(Icons.calendar_today_outlined, 'Year of Study',
+          _infoRow(Icons.calendar_month_rounded, 'Academic Year',
               user?.yearOfStudy != null ? 'Year ${user!.yearOfStudy}' : '—'),
         ],
       ),
@@ -166,27 +224,41 @@ class StudentProfileScreen extends StatelessWidget {
 
   Widget _infoRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.primary, size: 20),
-          const SizedBox(width: 14),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 20),
+          ),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  label,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  label.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textMuted.withOpacity(0.6),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   value,
                   style: const TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -196,5 +268,8 @@ class StudentProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _divider() => Divider(color: Colors.grey[100], height: 1);
+  Widget _divider() => Padding(
+        padding: const EdgeInsets.only(left: 46),
+        child: Divider(color: AppColors.divider.withOpacity(0.5), height: 1),
+      );
 }

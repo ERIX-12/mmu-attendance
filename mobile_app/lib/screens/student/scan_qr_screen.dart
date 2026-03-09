@@ -83,12 +83,30 @@ class _ScanQrScreenState extends State<ScanQrScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text(
-          'Scan QR Code',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          'Mark Attendance',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+            fontSize: 22,
+            letterSpacing: -0.5,
+          ),
+        ),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+          ),
         ),
         actions: [
           IconButton(
@@ -96,16 +114,25 @@ class _ScanQrScreenState extends State<ScanQrScreen>
               setState(() => _torchOn = !_torchOn);
               _controller.toggleTorch();
             },
-            icon: Icon(
-              _torchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
-              color: _torchOn ? Colors.yellow : Colors.white,
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _torchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
+                color: _torchOn ? Colors.yellow : Colors.white,
+                size: 20,
+              ),
             ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Stack(
         children: [
-          // Camera view
+          // Camera view - using a more modern camera layout
           if (_result == null)
             MobileScanner(
               controller: _controller,
@@ -123,26 +150,37 @@ class _ScanQrScreenState extends State<ScanQrScreen>
           // Scanning overlay
           if (_result == null) _buildScanOverlay(),
 
-          // Loading indicator
+          // Glassmorphic Loading indicator
           if (_isProcessing)
             Container(
-              color: Colors.black54,
-              child: const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 16),
-                    Text(
-                      'Marking attendance...',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ],
+              color: Colors.black.withOpacity(0.7),
+              child: BackdropFilter(
+                filter: ColorFilter.mode(Colors.black.withOpacity(0.2), BlendMode.darken),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(
+                        color: AppColors.primary,
+                        strokeWidth: 5,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Verifying Status...',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
 
-          // Result overlay
+          // Result overlay - modern and premium
           if (_result != null && !_isProcessing) _buildResultOverlay(),
         ],
       ),
@@ -157,31 +195,69 @@ class _ScanQrScreenState extends State<ScanQrScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Scanner frame
+                // Instruction Text Top
+                Text(
+                  'SCAN ATTENDANCE',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 3,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                
+                // Scanner frame with premium styling
                 Container(
-                  width: 260,
-                  height: 260,
+                  width: 280,
+                  height: 280,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.transparent, width: 2),
+                    border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+                    borderRadius: BorderRadius.circular(40),
                   ),
                   child: Stack(
                     children: [
-                      // Corner decorations
+                      // Animated scanning line could be added here
                       ..._buildCorners(),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                
+                const SizedBox(height: 48),
+                
+                // Tip Container
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  margin: const EdgeInsets.symmetric(horizontal: 40),
                   decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
                   ),
-                  child: const Text(
-                    'Point camera at your lecturer\'s QR code',
-                    style: TextStyle(color: Colors.white, fontSize: 14),
-                    textAlign: TextAlign.center,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.lightbulb_rounded, color: AppColors.primary, size: 16),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Place the QR code inside the frame to mark your attendance.',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -193,9 +269,11 @@ class _ScanQrScreenState extends State<ScanQrScreen>
   }
 
   List<Widget> _buildCorners() {
-    const size = 30.0;
-    const thickness = 4.0;
-    const color = Color(0xFF1E88E5);
+    const size = 42.0;
+    const thickness = 6.0;
+    const color = AppColors.primary;
+    final radius = Radius.circular(30);
+
     return [
       // Top-left
       Positioned(
@@ -204,7 +282,10 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: size,
           height: thickness,
-          color: color,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.only(topLeft: radius),
+          ),
         ),
       ),
       Positioned(
@@ -213,103 +294,211 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: thickness,
           height: size,
-          color: color,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.only(topLeft: radius),
+          ),
         ),
       ),
       // Top-right
       Positioned(
         top: 0,
         right: 0,
-        child: Container(width: size, height: thickness, color: color),
+        child: Container(
+          width: size,
+          height: thickness,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.only(topRight: radius),
+          ),
+        ),
       ),
       Positioned(
         top: 0,
         right: 0,
-        child: Container(width: thickness, height: size, color: color),
+        child: Container(
+          width: thickness,
+          height: size,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.only(topRight: radius),
+          ),
+        ),
       ),
       // Bottom-left
       Positioned(
         bottom: 0,
         left: 0,
-        child: Container(width: size, height: thickness, color: color),
+        child: Container(
+          width: size,
+          height: thickness,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.only(bottomLeft: radius),
+          ),
+        ),
       ),
       Positioned(
         bottom: 0,
         left: 0,
-        child: Container(width: thickness, height: size, color: color),
+        child: Container(
+          width: thickness,
+          height: size,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.only(bottomLeft: radius),
+          ),
+        ),
       ),
       // Bottom-right
       Positioned(
         bottom: 0,
         right: 0,
-        child: Container(width: size, height: thickness, color: color),
+        child: Container(
+          width: size,
+          height: thickness,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.only(bottomRight: radius),
+          ),
+        ),
       ),
       Positioned(
         bottom: 0,
         right: 0,
-        child: Container(width: thickness, height: size, color: color),
+        child: Container(
+          width: thickness,
+          height: size,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.only(bottomRight: radius),
+          ),
+        ),
       ),
     ];
   }
 
   Widget _buildResultOverlay() {
+    final statusColor = _isSuccess ? AppColors.success : AppColors.error;
+    
     return Container(
-      color: Colors.black87,
+      color: Colors.black.withOpacity(0.9),
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Icon
-              Container(
-                width: 90,
-                height: 90,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _isSuccess
-                      ? const Color(0xFF43A047).withOpacity(0.2)
-                      : const Color(0xFFE53935).withOpacity(0.2),
-                ),
-                child: Icon(
-                  _isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
-                  size: 60,
-                  color: _isSuccess ? const Color(0xFF43A047) : const Color(0xFFE53935),
-                ),
+              // Icon with glow
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: statusColor.withOpacity(0.1),
+                    ),
+                  ),
+                  Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: statusColor.withOpacity(0.2),
+                    ),
+                  ),
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: statusColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: statusColor.withOpacity(0.4),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      _isSuccess ? Icons.check_rounded : Icons.close_rounded,
+                      size: 48,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
               Text(
-                _isSuccess ? 'Success!' : 'Failed',
+                _isSuccess ? 'VERIFIED' : 'FAILED',
                 style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: _isSuccess ? const Color(0xFF43A047) : const Color(0xFFE53935),
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: statusColor,
+                  letterSpacing: -1,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Text(
                 _result ?? '',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.white70,
-                  height: 1.5,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white.withOpacity(0.7),
+                  fontWeight: FontWeight.w500,
+                  height: 1.6,
                 ),
               ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: _resetScanner,
-                icon: const Icon(Icons.qr_code_scanner_rounded),
-                label: const Text('Scan Again'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+              const SizedBox(height: 60),
+              
+              // Action Button
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: _isSuccess ? () => Navigator.pop(context) : _resetScanner,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _isSuccess ? AppColors.success : AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    elevation: 10,
+                    shadowColor: (_isSuccess ? AppColors.success : AppColors.primary).withOpacity(0.4),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(_isSuccess ? Icons.done_all_rounded : Icons.refresh_rounded, size: 24),
+                      const SizedBox(width: 12),
+                      Text(
+                        _isSuccess ? 'DONE' : 'TRY AGAIN',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+              if (!_isSuccess) ... [
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Cancel and Exit',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.5),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

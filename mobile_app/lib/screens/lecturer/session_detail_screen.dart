@@ -116,37 +116,52 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        centerTitle: true,
+        backgroundColor: AppColors.background,
         elevation: 0,
         title: Text(
-          _session.title.isNotEmpty ? _session.title : 'Session Detail',
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+          _session.title.isNotEmpty ? _session.title : 'Session Details',
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w900,
+            fontSize: 22,
+            letterSpacing: -0.5,
+          ),
         ),
         actions: [
           if (_session.isActive)
             IconButton(
               onPressed: _isLoading ? null : _refreshQr,
-              icon: const Icon(Icons.qr_code_2_rounded, color: AppColors.primary),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.qr_code_2_rounded, color: AppColors.primary, size: 20),
+              ),
               tooltip: 'Refresh QR',
             ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 10),
             _buildStatusCard(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             _buildInfoCard(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             if (_session.isActive) _buildQrCard(),
-            if (_session.isActive) const SizedBox(height: 16),
+            if (_session.isActive) const SizedBox(height: 24),
             _buildActionButtons(),
-            const SizedBox(height: 16),
-            _buildAttendanceList(),
             const SizedBox(height: 32),
+            _buildAttendanceList(),
+            const SizedBox(height: 48),
           ],
         ),
       ),
@@ -157,52 +172,72 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     Color statusColor;
     String statusLabel;
     IconData statusIcon;
+    Gradient statusGradient;
 
     switch (_session.status) {
       case 'active':
         statusColor = AppColors.success;
-        statusLabel = 'LIVE';
-        statusIcon = Icons.radio_button_checked_rounded;
+        statusLabel = 'SESSION IS LIVE';
+        statusIcon = Icons.sensors_rounded;
+        statusGradient = LinearGradient(colors: [statusColor, statusColor.withOpacity(0.8)]);
         break;
       case 'completed':
-        statusColor = Colors.grey;
-        statusLabel = 'COMPLETED';
-        statusIcon = Icons.check_circle_rounded;
+        statusColor = AppColors.textMuted;
+        statusLabel = 'SESSION COMPLETED';
+        statusIcon = Icons.task_alt_rounded;
+        statusGradient = LinearGradient(colors: [statusColor, statusColor.withOpacity(0.7)]);
         break;
       default:
         statusColor = AppColors.warning;
-        statusLabel = 'PENDING';
-        statusIcon = Icons.schedule_rounded;
+        statusLabel = 'SESSION PENDING';
+        statusIcon = Icons.hourglass_empty_rounded;
+        statusGradient = const LinearGradient(colors: [Color(0xFFFFA000), Color(0xFFFFC107)]);
     }
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: statusColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: statusColor.withOpacity(0.12), width: 1.5),
       ),
       child: Row(
         children: [
-          Icon(statusIcon, color: statusColor, size: 28),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                statusLabel,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: statusColor,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(statusIcon, color: statusColor, size: 28),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  statusLabel,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    color: statusColor,
+                    letterSpacing: 1,
+                  ),
                 ),
-              ),
-              Text(
-                '${_attendanceRecords.length} students checked in',
-                style: TextStyle(fontSize: 13, color: statusColor.withOpacity(0.8)),
-              ),
-            ],
+                const SizedBox(height: 2),
+                Text(
+                  '${_attendanceRecords.length} Students Checked In',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -211,111 +246,139 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
 
   Widget _buildInfoCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: AppColors.softShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Session Info', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          const Divider(height: 20),
-          _infoRow('Course', '${_session.courseCode} · ${_session.courseName}'),
-          _infoRow('Date', _session.date),
-          _infoRow('Time', '${_session.startTime} — ${_session.endTime}'),
-          if (_session.venue != null && _session.venue!.isNotEmpty)
-            _infoRow('Venue', _session.venue!),
-          if (_session.topic != null && _session.topic!.isNotEmpty)
-            _infoRow('Topic', _session.topic!),
-          if (_session.description != null && _session.description!.isNotEmpty)
-            _infoRow('Description', _session.description!),
+          const Text(
+            'SESSION INFORMATION',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textMuted,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+          _infoRow(Icons.book_rounded, 'Course', '${_session.courseCode} · ${_session.courseName}'),
+          _divider(),
+          _infoRow(Icons.calendar_month_rounded, 'Date', _session.date),
+          _divider(),
+          _infoRow(Icons.access_time_filled_rounded, 'Time Range', '${_session.startTime} — ${_session.endTime}'),
+          if (_session.venue != null && _session.venue!.isNotEmpty) ... [
+            _divider(),
+            _infoRow(Icons.location_on_rounded, 'Venue Location', _session.venue!),
+          ],
+          if (_session.topic != null && _session.topic!.isNotEmpty) ... [
+            _divider(),
+            _infoRow(Icons.topic_rounded, 'Topic Title', _session.topic!),
+          ],
         ],
       ),
     );
   }
 
-  Widget _infoRow(String label, String value) {
+  Widget _infoRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 90,
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 13, color: Colors.grey[500], fontWeight: FontWeight.w500),
-            ),
-          ),
+          Icon(icon, color: AppColors.primary.withOpacity(0.5), size: 18),
+          const SizedBox(width: 16),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 13, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textMuted.withOpacity(0.6),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _divider() => Padding(
+        padding: const EdgeInsets.only(left: 34),
+        child: Divider(color: AppColors.divider.withOpacity(0.5), height: 1),
+      );
 
   Widget _buildQrCard() {
     final qrImage = _session.qrCodeImage;
     if (qrImage == null || qrImage.isEmpty) return const SizedBox();
 
-    // Parse base64 image
     Widget qrWidget;
     try {
       final base64Data = qrImage.contains(',') ? qrImage.split(',')[1] : qrImage;
-      qrWidget = Image.memory(
-        base64Decode(base64Data),
-        width: 220,
-        height: 220,
-        fit: BoxFit.contain,
+      qrWidget = ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.memory(
+          base64Decode(base64Data),
+          width: 240,
+          height: 240,
+          fit: BoxFit.contain,
+        ),
       );
     } catch (e) {
-      qrWidget = const Icon(Icons.qr_code_rounded, size: 100, color: AppColors.primary);
+      qrWidget = const Icon(Icons.qr_code_rounded, size: 120, color: AppColors.primary);
     }
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: AppColors.softShadow,
       ),
       child: Column(
         children: [
           const Text(
-            'QR Code',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+            'SCAN TO MARK ATTENDANCE',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+              letterSpacing: 2,
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Students scan this to mark attendance',
-            style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 32),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.divider, width: 1.5),
-              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 2),
             ),
             child: qrWidget,
           ),
-          const SizedBox(height: 12),
-          TextButton.icon(
-            onPressed: _isLoading ? null : _refreshQr,
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Refresh QR Code'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+          const SizedBox(height: 24),
+          Text(
+            'Keep this QR visible for students',
+            style: TextStyle(fontSize: 13, color: AppColors.textMuted.withOpacity(0.8), fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -323,57 +386,68 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   }
 
   Widget _buildActionButtons() {
-    return Column(
-      children: [
-        if (_session.isInactive)
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _activateSession,
-              icon: _isLoading
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Icon(Icons.play_arrow_rounded),
-              label: const Text('Activate Session', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.success,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 0,
-              ),
-            ),
-          )
-        else if (_session.isActive)
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _deactivateSession,
-              icon: _isLoading
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Icon(Icons.stop_rounded),
-              label: const Text('End Session', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 0,
-              ),
-            ),
+    if (_session.isInactive) {
+      return SizedBox(
+        width: double.infinity,
+        height: 64,
+        child: ElevatedButton(
+          onPressed: _isLoading ? null : _activateSession,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.success,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            elevation: 8,
+            shadowColor: AppColors.success.withOpacity(0.4),
           ),
-      ],
-    );
+          child: _isLoading
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.play_arrow_rounded, size: 28),
+                    SizedBox(width: 12),
+                    Text('ACTIVATE SESSION', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                  ],
+                ),
+        ),
+      );
+    } else if (_session.isActive) {
+      return SizedBox(
+        width: double.infinity,
+        height: 64,
+        child: ElevatedButton(
+          onPressed: _isLoading ? null : _deactivateSession,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.error,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            elevation: 8,
+            shadowColor: AppColors.error.withOpacity(0.4),
+          ),
+          child: _isLoading
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.stop_rounded, size: 28),
+                    SizedBox(width: 12),
+                    Text('END SESSION', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                  ],
+                ),
+        ),
+      );
+    }
+    return const SizedBox();
   }
 
   Widget _buildAttendanceList() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: AppColors.softShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,76 +455,111 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           Row(
             children: [
               const Text(
-                'Attendance',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                'STUDENT LOGS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textMuted,
+                  letterSpacing: 1.5,
+                ),
               ),
               const Spacer(),
-              Text(
-                '${_attendanceRecords.length} present',
-                style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${_attendanceRecords.length} Present',
+                  style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w900),
+                ),
               ),
             ],
           ),
-          const Divider(height: 20),
+          const SizedBox(height: 12),
+          const Divider(color: AppColors.divider, height: 1),
+          const SizedBox(height: 8),
           if (_loadingAttendance)
             const Center(
               child: Padding(
-                padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(color: AppColors.primary),
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
               ),
             )
           else if (_attendanceRecords.isEmpty)
             Center(
               child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  _session.isInactive
-                      ? 'Activate the session to start tracking.'
-                      : 'No students have marked attendance yet.',
-                  style: const TextStyle(color: Colors.grey),
-                  textAlign: TextAlign.center,
+                padding: const EdgeInsets.all(40),
+                child: Column(
+                  children: [
+                    Icon(Icons.person_off_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.2)),
+                    const SizedBox(height: 16),
+                    Text(
+                      _session.isInactive
+                          ? 'Activate session to begin.'
+                          : 'No check-ins recorded yet.',
+                      style: TextStyle(color: AppColors.textMuted.withOpacity(0.5), fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             )
           else
-            ..._attendanceRecords.map((r) {
-              final isPresent = r['status'] == 'present';
-              final student = r['student'] ?? {};
-              final name = '${student['first_name'] ?? ''} ${student['last_name'] ?? ''}'.trim();
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: isPresent
-                      ? AppColors.success.withOpacity(0.1)
-                      : AppColors.error.withOpacity(0.1),
-                  child: Icon(
-                    isPresent ? Icons.check_rounded : Icons.close_rounded,
-                    size: 18,
-                    color: isPresent ? AppColors.success : AppColors.error,
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _attendanceRecords.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 4),
+              itemBuilder: (ctx, i) {
+                final r = _attendanceRecords[i];
+                final isPresent = r['status'] == 'present';
+                final student = r['student'] ?? {};
+                final name = '${student['first_name'] ?? ''} ${student['last_name'] ?? ''}'.trim();
+                final displayName = name.isNotEmpty ? name : (student['username'] ?? 'Unknown');
+                
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        child: Text(
+                          displayName.isNotEmpty ? displayName[0].toUpperCase() : 'S',
+                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 13),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              displayName,
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                            ),
+                            Text(
+                              student['student_number'] ?? student['username'] ?? 'ID Unknown',
+                              style: TextStyle(fontSize: 12, color: AppColors.textMuted.withOpacity(0.6), fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.success.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.check_rounded, color: AppColors.success, size: 16),
+                      ),
+                    ],
                   ),
-                ),
-                title: Text(
-                  name.isNotEmpty ? name : (student['username'] ?? 'Student'),
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-                trailing: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: (isPresent ? AppColors.success : AppColors.error).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    isPresent ? 'Present' : 'Absent',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: isPresent ? AppColors.success : AppColors.error,
-                    ),
-                  ),
-                ),
-              );
-            }),
+                );
+              },
+            ),
         ],
       ),
     );

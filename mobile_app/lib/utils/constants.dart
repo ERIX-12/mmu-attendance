@@ -30,43 +30,79 @@ class AppConstants {
 }
 
 class AppColors {
-  static const Color primary = Color(0xFF1565C0);
-  static const Color primaryLight = Color(0xFF1E88E5);
-  static const Color primaryDark = Color(0xFF0D47A1);
-  static const Color secondary = Color(0xFF00ACC1);
-  static const Color accent = Color(0xFF00B0FF);
-  static const Color background = Color(0xFFF0F4FF);
+  // Brand Colors
+  static const Color primary = Color(0xFF1E3A8A); // Slate Blue
+  static const Color primaryLight = Color(0xFF3B82F6); // Bright Blue
+  static const Color primaryDark = Color(0xFF1E3A8A); 
+  static const Color secondary = Color(0xFF10B981); // Emerald
+  static const Color accent = Color(0xFF8B5CF6); // Violet
+  
+  // Neutral Colors
+  static const Color background = Color(0xFFF8FAFC); 
   static const Color surface = Color(0xFFFFFFFF);
   static const Color cardBg = Color(0xFFFFFFFF);
-  static const Color textPrimary = Color(0xFF1A237E);
-  static const Color textSecondary = Color(0xFF5C6BC0);
-  static const Color textMuted = Color(0xFF9FA8DA);
-  static const Color success = Color(0xFF43A047);
-  static const Color warning = Color(0xFFFFB300);
-  static const Color error = Color(0xFFE53935);
-  static const Color divider = Color(0xFFE8EAF6);
+  
+  // Text Colors
+  static const Color textPrimary = Color(0xFF0F172A); 
+  static const Color textSecondary = Color(0xFF475569);
+  static const Color textMuted = Color(0xFF94A3B8);
+  
+  // Status Colors
+  static const Color success = Color(0xFF10B981);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color error = Color(0xFFEF4444);
+  static const Color info = Color(0xFF3B82F6);
+  static const Color divider = Color(0xFFE2E8F0);
 
+  // Modern Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF1565C0), Color(0xFF1E88E5)],
+    colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient cardGradient = LinearGradient(
-    colors: [Color(0xFF1565C0), Color(0xFF0D47A1)],
+  static const LinearGradient blueGradient = LinearGradient(
+    colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient successGradient = LinearGradient(
-    colors: [Color(0xFF43A047), Color(0xFF66BB6A)],
+    colors: [Color(0xFF059669), Color(0xFF10B981)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient warningGradient = LinearGradient(
-    colors: [Color(0xFFFF8F00), Color(0xFFFFB300)],
+  static const LinearGradient accentGradient = LinearGradient(
+    colors: [Color(0xFF7C3AED), Color(0xFF8B5CF6)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  static const LinearGradient darkGradient = LinearGradient(
+    colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  static List<BoxShadow> softShadow = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.04),
+      blurRadius: 12,
+      offset: const Offset(0, 4),
+    ),
+    BoxShadow(
+      color: Colors.black.withOpacity(0.02),
+      blurRadius: 2,
+      offset: const Offset(0, 1),
+    ),
+  ];
+  
+  static List<BoxShadow> mediumShadow = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.08),
+      blurRadius: 24,
+      offset: const Offset(0, 8),
+    ),
+  ];
 }

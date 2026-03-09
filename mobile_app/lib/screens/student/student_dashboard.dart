@@ -43,6 +43,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
   Widget build(BuildContext context) {
     if (!_pagesBuilt) return const SizedBox();
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
@@ -53,28 +54,34 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
   Widget _buildBottomNav() {
     return Container(
+      margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _navItem(0, Icons.home_rounded, 'Home'),
-              _navItem(1, Icons.book_rounded, 'Courses'),
-              _scanButton(),
-              _navItem(3, Icons.bar_chart_rounded, 'Records'),
-              _navItem(4, Icons.person_rounded, 'Profile'),
-            ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _navItem(0, Icons.grid_view_rounded, 'Home'),
+                _navItem(1, Icons.auto_stories_rounded, 'Courses'),
+                _scanButton(),
+                _navItem(3, Icons.analytics_rounded, 'Log'),
+                _navItem(4, Icons.person_rounded, 'Me'),
+              ],
+            ),
           ),
         ),
       ),
@@ -85,30 +92,35 @@ class _StudentDashboardState extends State<StudentDashboard> {
     final isSelected = _currentIndex == index;
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
+      behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.fastOutSlowIn,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+          borderRadius: BorderRadius.circular(22),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : Colors.grey[400],
-              size: 22,
+              color: isSelected ? AppColors.primary : AppColors.textMuted.withOpacity(0.6),
+              size: 24,
             ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.primary : Colors.grey[400],
+            if (isSelected) ...[
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primary,
+                  letterSpacing: 0.2,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -119,16 +131,16 @@ class _StudentDashboardState extends State<StudentDashboard> {
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = 2),
       child: Container(
-        width: 58,
-        height: 58,
+        width: 56,
+        height: 56,
         decoration: BoxDecoration(
           gradient: AppColors.primaryGradient,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: AppColors.primary.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -174,10 +186,12 @@ class _StudentHomeState extends State<_StudentHome> {
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -197,162 +211,153 @@ class _StudentHomeState extends State<_StudentHome> {
       body: RefreshIndicator(
         onRefresh: _loadData,
         color: AppColors.primary,
+        displacement: 40,
         child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
           slivers: [
             SliverAppBar(
-              expandedHeight: 200,
+              expandedHeight: 280,
               pinned: true,
+              stretch: true,
               backgroundColor: AppColors.primary,
+              elevation: 0,
+              centerTitle: false,
+              title: const Text(
+                'MMU ATTENDANCE',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3),
+              ),
               flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: Colors.white.withOpacity(0.2),
-                                child: Text(
-                                  user?.initials ?? 'S',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Hello, ${user?.firstName ?? 'Student'}! 👋',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    Text(
-                                      user?.studentNumber ?? '',
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.75),
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: const Text(
-                                  'Student',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'Overall Attendance',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.75),
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '$_overallPercentage%',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 42,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8, left: 8),
-                                child: Text(
-                                  _overallPercentage >= 80 ? '✅ Good standing' : '⚠️ Below threshold',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.85),
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                stretchModes: const [StretchMode.zoomBackground],
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.primaryGradient,
                       ),
                     ),
-                  ),
+                    Positioned(
+                      top: -60,
+                      right: -60,
+                      child: CircleAvatar(
+                        radius: 140,
+                        backgroundColor: Colors.white.withOpacity(0.05),
+                      ),
+                    ),
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 40),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 30,
+                                    backgroundColor: Colors.white.withOpacity(0.15),
+                                    child: Text(
+                                      user?.initials ?? 'S',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'HELLO,',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.6),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 2,
+                                        ),
+                                      ),
+                                      Text(
+                                        user?.firstName ?? 'Student',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+                              ),
+                              child: Row(
+                                children: [
+                                  _quickStat('ATTENDANCE', '$_overallPercentage%'),
+                                  _statDivider(),
+                                  _quickStat('COURSES', '${_summary.length}'),
+                                  _statDivider(),
+                                  _quickStat('STATUS', _overallPercentage >= 80 ? 'OK' : 'RISK'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Stats Row
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: StatCard(
-                            icon: Icons.book_rounded,
-                            title: 'Enrolled',
-                            value: '${_summary.length}',
-                            subtitle: 'Courses',
-                            color: AppColors.primary,
+                        const Text(
+                          'Your Progress',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: StatCard(
-                            icon: Icons.warning_amber_rounded,
-                            title: 'At Risk',
-                            value: '$_belowThresholdCount',
-                            subtitle: 'Courses',
-                            color: _belowThresholdCount > 0 ? AppColors.error : AppColors.success,
-                          ),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text('Refresh', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-
-                    // Course attendance list
-                    const Text(
-                      'Course Attendance',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
 
                     if (_isLoading)
                       const Center(
                         child: Padding(
-                          padding: EdgeInsets.all(40),
-                          child: CircularProgressIndicator(color: AppColors.primary),
+                          padding: EdgeInsets.all(60),
+                          child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
                         ),
                       )
                     else if (_error != null)
@@ -361,8 +366,6 @@ class _StudentHomeState extends State<_StudentHome> {
                       _buildEmptyCard()
                     else
                       ..._summary.map((s) => _buildCourseAttendanceCard(s)),
-
-                    const SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -373,6 +376,31 @@ class _StudentHomeState extends State<_StudentHome> {
     );
   }
 
+  Widget _quickStat(String label, String value) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.5),
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statDivider() => Container(width: 1, height: 30, color: Colors.white.withOpacity(0.1));
+
   Widget _buildCourseAttendanceCard(AttendanceSummaryModel s) {
     final color = s.attendancePercentage >= 80
         ? AppColors.success
@@ -381,94 +409,121 @@ class _StudentHomeState extends State<_StudentHome> {
             : AppColors.error;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: AppColors.softShadow,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      s.courseCode,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        s.courseCode,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primary,
+                          letterSpacing: 0.5,
+                        ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        s.courseName,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                AttendanceBadge(percentage: s.attendancePercentage),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Icon(Icons.event_available_rounded, size: 16, color: AppColors.textMuted.withOpacity(0.5)),
+                const SizedBox(width: 8),
+                Text(
+                  '${s.attendedSessions}/${s.totalSessions} sessions attended',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textMuted.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Stack(
+              children: [
+                Container(
+                  height: 10,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.divider.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 1200),
+                  curve: Curves.fastOutSlowIn,
+                  height: 10,
+                  width: (MediaQuery.of(context).size.width - 96) * (s.attendancePercentage / 100),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [color, color.withOpacity(0.8)],
                     ),
-                    Text(
-                      s.courseName,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (s.belowThreshold && s.totalSessions > 0)
+              Container(
+                margin: const EdgeInsets.only(top: 20),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, size: 18, color: AppColors.error),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'Attendance is below required threshold',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.error,
                       ),
                     ),
                   ],
                 ),
               ),
-              AttendanceBadge(percentage: s.attendancePercentage),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Text(
-                '${s.attendedSessions}/${s.totalSessions} sessions',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-              const Spacer(),
-              Text(
-                '${s.attendancePercentage}%',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: s.attendancePercentage / 100,
-              backgroundColor: color.withOpacity(0.12),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-              minHeight: 6,
-            ),
-          ),
-          if (s.belowThreshold && s.totalSessions > 0)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded, size: 14, color: AppColors.error),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Below 80% threshold — at risk',
-                    style: TextStyle(fontSize: 12, color: AppColors.error),
-                  ),
-                ],
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -477,16 +532,17 @@ class _StudentHomeState extends State<_StudentHome> {
     return Center(
       child: Column(
         children: [
-          const SizedBox(height: 20),
-          const Icon(Icons.cloud_off_rounded, size: 48, color: Colors.grey),
-          const SizedBox(height: 12),
-          Text(_error ?? 'Failed to load data', textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 12),
+          const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.textMuted),
+          const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: _loadData,
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+            label: const Text('RETRY'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           ),
         ],
       ),
@@ -495,17 +551,33 @@ class _StudentHomeState extends State<_StudentHome> {
 
   Widget _buildEmptyCard() {
     return Center(
-      child: Column(
-        children: [
-          const SizedBox(height: 30),
-          const Icon(Icons.inbox_rounded, size: 56, color: Colors.grey),
-          const SizedBox(height: 12),
-          const Text(
-            'No courses enrolled yet.\nGo to Courses tab to enroll.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey, fontSize: 14),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(48),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: AppColors.softShadow,
+              ),
+              child: Icon(Icons.library_books_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'No courses found.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Enroll in courses to start tracking your attendance.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
       ),
     );
   }
