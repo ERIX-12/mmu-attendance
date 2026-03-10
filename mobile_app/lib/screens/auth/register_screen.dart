@@ -105,14 +105,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       userData['staff_id'] = _staffIdController.text.trim();
     }
 
+    debugPrint('Starting registration for ${userData['username']}...');
     try {
       final result = await AuthService().register(userData);
+      debugPrint('Registration result: $result');
 
       if (!mounted) return;
 
       if (result['success'] == true) {
-        if (!mounted) return;
-        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Registration successful! Please sign in with your credentials.'),
@@ -132,6 +132,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
     } catch (e) {
+      debugPrint('Registration error: $e');
       setState(() {
         _errorMessage = 'Connection error. Is the server running?';
         _isLoading = false;
