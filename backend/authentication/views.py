@@ -246,15 +246,9 @@ def register_view(request):
     if serializer.is_valid():
         user = serializer.save()
         
-        # Generate tokens
-        refresh = RefreshToken.for_user(user)
-        access_token = refresh.access_token
-        
         response_data = {
-            'access': str(access_token),
-            'refresh': str(refresh),
             'user': UserSerializer(user).data,
-            'message': 'User registered successfully'
+            'message': 'User registered successfully. Please log in to continue.'
         }
         
         return Response(response_data, status=status.HTTP_201_CREATED)

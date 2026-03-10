@@ -97,14 +97,18 @@ export default function LoginPage() {
                 faculty: form.faculty,
                 department: form.department,
             };
-            const { data } = await authApi.register(registerData);
-            useAuthStore.getState().setTokens(data.access, data.refresh);
-            const meRes = await authApi.me();
-            login(meRes.data, data.access, data.refresh);
-            toast.success('Registration successful!');
-            if (meRes.data.role === 'admin') navigate('/admin');
-            else if (meRes.data.role === 'lecturer') navigate('/lecturer');
-            else navigate('/student');
+            await authApi.register(registerData);
+            
+            toast.success('Registration successful! Please sign in with your credentials.', {
+                duration: 5000,
+                icon: '🚀'
+            });
+            
+            // Switch to login tab
+            setTabIndex(0);
+            // Clear password fields for security
+            setForm(f => ({ ...f, password: '', confirm_password: '' }));
+            
         } catch (err) {
             const errs = err.response?.data;
             const firstErr = errs ? Object.values(errs)[0][0] : 'Registration failed';
