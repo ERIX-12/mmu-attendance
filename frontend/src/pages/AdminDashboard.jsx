@@ -186,12 +186,23 @@ function CoursesTab({ courses, users, onRefresh }) {
             setOpen(false);
             await onRefresh();
         } catch (e) {
-            console.error('Course save error:', e.response?.data);
+            console.error('Course save error:', e.response?.data || e);
             const errs = e.response?.data;
             let errMsg = 'Failed to save course';
+            
             if (errs) {
-                const firstKey = Object.keys(errs)[0];
-                errMsg = `${firstKey}: ${errs[firstKey][0]}`;
+                if (typeof errs === 'string') {
+                    errMsg = errs;
+                } else if (typeof errs === 'object') {
+                    const firstVal = Object.values(errs)[0];
+                    if (Array.isArray(firstVal)) {
+                        errMsg = firstVal[0];
+                    } else if (typeof firstVal === 'string') {
+                        errMsg = firstVal;
+                    } else {
+                        errMsg = JSON.stringify(firstVal);
+                    }
+                }
             }
             toast.error(errMsg);
         } finally { setSaving(false); }
@@ -355,20 +366,40 @@ function UsersTab({ users, onRefresh }) {
         }
         setSaving(true);
         try {
+            const payload = { ...form };
+            // Ensure year_of_study is an integer or null
+            if (payload.year_of_study === '') payload.year_of_study = null;
+            else if (payload.year_of_study) payload.year_of_study = parseInt(payload.year_of_study);
+
             if (editingUser) {
-                await authApi.updateUser(editingUser.id, form);
+                await authApi.updateUser(editingUser.id, payload);
                 toast.success('User updated successfully!');
             } else {
-                await authApi.createUser(form);
+                await authApi.createUser(payload);
                 toast.success('User created successfully!');
             }
             setOpen(false);
             await onRefresh();
         } catch (e) {
-            console.error('User save error:', e.response?.data);
+            console.error('User save error:', e.response?.data || e);
             const errs = e.response?.data;
-            const firstErr = errs ? Object.values(errs)[0][0] : 'Failed to save user';
-            toast.error(typeof firstErr === 'string' ? firstErr : 'Failed to save user');
+            let errMsg = 'Failed to save user';
+            
+            if (errs) {
+                if (typeof errs === 'string') {
+                    errMsg = errs;
+                } else if (typeof errs === 'object') {
+                    const firstVal = Object.values(errs)[0];
+                    if (Array.isArray(firstVal)) {
+                        errMsg = firstVal[0];
+                    } else if (typeof firstVal === 'string') {
+                        errMsg = firstVal;
+                    } else {
+                        errMsg = JSON.stringify(firstVal);
+                    }
+                }
+            }
+            toast.error(errMsg);
         } finally { setSaving(false); }
     };
 
