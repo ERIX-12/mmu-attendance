@@ -132,9 +132,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
     } catch (e) {
-      debugPrint('Registration error: $e');
+      debugPrint('UI registration error: $e');
       setState(() {
-        _errorMessage = 'Connection error. Is the server running?';
+        _errorMessage = 'An unexpected error occurred';
         _isLoading = false;
       });
     }

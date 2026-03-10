@@ -83,8 +83,9 @@ class _LoginScreenState extends State<LoginScreen>
         });
       }
     } catch (e) {
+      debugPrint('UI login error: $e');
       setState(() {
-        _errorMessage = 'Connection error. Is the server running?';
+        _errorMessage = 'An unexpected error occurred';
         _isLoading = false;
       });
     }

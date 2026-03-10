@@ -36,75 +36,89 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> login(String username, String password) async {
-    final response = await http.post(
-      Uri.parse(AppConstants.loginUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'password': password}),
-    );
+    print('Starting login for $username at ${AppConstants.loginUrl}...');
+    try {
+      final response = await http.post(
+        Uri.parse(AppConstants.loginUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'password': password}),
+      );
 
-    final data = jsonDecode(response.body);
+      print('Login status: ${response.statusCode}');
+      print('Login body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      _accessToken = data['access'];
-      final userJson = data['user'];
-      _currentUser = UserModel.fromJson(userJson);
+      final data = jsonDecode(response.body);
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_accessTokenKey, data['access']);
-      await prefs.setString(_refreshTokenKey, data['refresh']);
-      await prefs.setString(_userKey, jsonEncode(userJson));
+      if (response.statusCode == 200) {
+        _accessToken = data['access'];
+        final userJson = data['user'];
+        _currentUser = UserModel.fromJson(userJson);
 
-      return {'success': true, 'user': _currentUser};
-    } else {
-      // Parse Django validation errors into user-friendly messages
-      String errorMessage = 'Invalid credentials';
-      if (data is Map) {
-        if (data['non_field_errors'] != null && data['non_field_errors'] is List) {
-          errorMessage = data['non_field_errors'].first.toString();
-        } else if (data['detail'] != null) {
-          errorMessage = data['detail'].toString();
-        } else if (data['error'] != null) {
-          errorMessage = data['error'].toString();
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_accessTokenKey, data['access']);
+        await prefs.setString(_refreshTokenKey, data['refresh']);
+        await prefs.setString(_userKey, jsonEncode(userJson));
+
+        return {'success': true, 'user': _currentUser};
+      } else {
+        // Parse Django validation errors into user-friendly messages
+        String errorMessage = 'Invalid credentials';
+        if (data is Map) {
+          if (data['non_field_errors'] != null && data['non_field_errors'] is List) {
+            errorMessage = data['non_field_errors'].first.toString();
+          } else if (data['detail'] != null) {
+            errorMessage = data['detail'].toString();
+          } else if (data['error'] != null) {
+            errorMessage = data['error'].toString();
+          }
         }
+        return {'success': false, 'error': errorMessage};
       }
-      return {'success': false, 'error': errorMessage};
+    } catch (e) {
+      print('Login error exception: $e');
+      return {'success': false, 'error': 'Connection failed check your internet connection and try again'};
     }
   }
 
   Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
-    final response = await http.post(
-      Uri.parse(AppConstants.registerUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(userData),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(AppConstants.registerUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(userData),
+      );
 
-    print('Registration status: ${response.statusCode}');
-    print('Registration body: ${response.body}');
+      print('Registration status: ${response.statusCode}');
+      print('Registration body: ${response.body}');
 
-    final data = jsonDecode(response.body);
+      final data = jsonDecode(response.body);
 
-    if (response.statusCode == 201) {
-      // Backend no longer returns tokens on registration to enforce login step
-      return {'success': true, 'message': data['message'] ?? 'Registration successful'};
-    } else {
-      // Parse Django validation errors into user-friendly messages
-      String errorMessage = 'Registration failed';
-      if (data is Map) {
-        final errors = <String>[];
-        data.forEach((key, value) {
-          if (value is List && value.isNotEmpty) {
-            final fieldName = key.toString().replaceAll('_', ' ');
-            final capitalizedField = fieldName[0].toUpperCase() + fieldName.substring(1);
-            errors.add('$capitalizedField: ${value.first}');
-          } else if (value is String) {
-            errors.add(value);
+      if (response.statusCode == 201) {
+        // Backend no longer returns tokens on registration to enforce login step
+        return {'success': true, 'message': data['message'] ?? 'Registration successful'};
+      } else {
+        // Parse Django validation errors into user-friendly messages
+        String errorMessage = 'Registration failed';
+        if (data is Map) {
+          final errors = <String>[];
+          data.forEach((key, value) {
+            if (value is List && value.isNotEmpty) {
+              final fieldName = key.toString().replaceAll('_', ' ');
+              final capitalizedField = fieldName[0].toUpperCase() + fieldName.substring(1);
+              errors.add('$capitalizedField: ${value.first}');
+            } else if (value is String) {
+              errors.add(value);
+            }
+          });
+          if (errors.isNotEmpty) {
+            errorMessage = errors.join('\n');
           }
-        });
-        if (errors.isNotEmpty) {
-          errorMessage = errors.join('\n');
         }
+        return {'success': false, 'error': errorMessage};
       }
-      return {'success': false, 'error': errorMessage};
+    } catch (e) {
+      print('Registration error exception: $e');
+      return {'success': false, 'error': 'Connection failed check your internet connection and try again'};
     }
   }
 
