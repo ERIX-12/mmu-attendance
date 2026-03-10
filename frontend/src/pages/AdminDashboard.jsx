@@ -169,7 +169,6 @@ function CoursesTab({ courses, users, onRefresh }) {
         try {
             const payload = {
                 code: form.course_code,
-                course_code: form.course_code,
                 name: form.name,
                 credits: form.credits,
                 lecturer_id: form.lecturer,
@@ -186,22 +185,27 @@ function CoursesTab({ courses, users, onRefresh }) {
             setOpen(false);
             await onRefresh();
         } catch (e) {
-            console.error('Course save error:', e.response?.data || e);
-            const errs = e.response?.data;
+            console.error('Detailed save error:', e.response?.data || e);
+            const errData = e.response?.data;
             let errMsg = 'Failed to save course';
             
-            if (errs) {
-                if (typeof errs === 'string') {
-                    errMsg = errs;
-                } else if (typeof errs === 'object') {
-                    const firstVal = Object.values(errs)[0];
-                    if (Array.isArray(firstVal)) {
-                        errMsg = firstVal[0];
-                    } else if (typeof firstVal === 'string') {
-                        errMsg = firstVal;
-                    } else {
-                        errMsg = JSON.stringify(firstVal);
+            if (errData) {
+                if (typeof errData === 'string') {
+                    errMsg = errData.substring(0, 100);
+                } else if (typeof errData === 'object') {
+                    // Flatten error object into readable string
+                    const messages = [];
+                    for (const [key, value] of Object.entries(errData)) {
+                        const fieldName = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
+                        if (Array.isArray(value)) {
+                            messages.push(`${fieldName}: ${value[0]}`);
+                        } else if (typeof value === 'string') {
+                            messages.push(`${fieldName}: ${value}`);
+                        } else {
+                            messages.push(`${fieldName}: ${JSON.stringify(value)}`);
+                        }
                     }
+                    errMsg = messages.join(' | ') || 'Validation error';
                 }
             }
             toast.error(errMsg);
@@ -381,22 +385,26 @@ function UsersTab({ users, onRefresh }) {
             setOpen(false);
             await onRefresh();
         } catch (e) {
-            console.error('User save error:', e.response?.data || e);
-            const errs = e.response?.data;
+            console.error('Detailed user save error:', e.response?.data || e);
+            const errData = e.response?.data;
             let errMsg = 'Failed to save user';
             
-            if (errs) {
-                if (typeof errs === 'string') {
-                    errMsg = errs;
-                } else if (typeof errs === 'object') {
-                    const firstVal = Object.values(errs)[0];
-                    if (Array.isArray(firstVal)) {
-                        errMsg = firstVal[0];
-                    } else if (typeof firstVal === 'string') {
-                        errMsg = firstVal;
-                    } else {
-                        errMsg = JSON.stringify(firstVal);
+            if (errData) {
+                if (typeof errData === 'string') {
+                    errMsg = errData.substring(0, 100);
+                } else if (typeof errData === 'object') {
+                    const messages = [];
+                    for (const [key, value] of Object.entries(errData)) {
+                        const fieldName = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
+                        if (Array.isArray(value)) {
+                            messages.push(`${fieldName}: ${value[0]}`);
+                        } else if (typeof value === 'string') {
+                            messages.push(`${fieldName}: ${value}`);
+                        } else {
+                            messages.push(`${fieldName}: ${JSON.stringify(value)}`);
+                        }
                     }
+                    errMsg = messages.join(' | ') || 'Validation error';
                 }
             }
             toast.error(errMsg);

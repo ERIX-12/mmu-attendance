@@ -110,9 +110,29 @@ export default function LoginPage() {
             setForm(f => ({ ...f, password: '', confirm_password: '' }));
             
         } catch (err) {
-            const errs = err.response?.data;
-            const firstErr = errs ? Object.values(errs)[0][0] : 'Registration failed';
-            toast.error(typeof firstErr === 'string' ? firstErr : 'Registration failed');
+            console.error('Registration error:', err.response?.data || err);
+            const errData = err.response?.data;
+            let errMsg = 'Registration failed';
+            
+            if (errData) {
+                if (typeof errData === 'string') {
+                    errMsg = errData.substring(0, 100);
+                } else if (typeof errData === 'object') {
+                    const messages = [];
+                    for (const [key, value] of Object.entries(errData)) {
+                        const fieldName = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
+                        if (Array.isArray(value)) {
+                            messages.push(`${fieldName}: ${value[0]}`);
+                        } else if (typeof value === 'string') {
+                            messages.push(`${fieldName}: ${value}`);
+                        } else {
+                            messages.push(`${fieldName}: ${JSON.stringify(value)}`);
+                        }
+                    }
+                    errMsg = messages.join(' | ') || 'Registration error';
+                }
+            }
+            toast.error(errMsg);
         } finally {
             setLoading(false);
         }
