@@ -177,10 +177,20 @@ class _StudentHomeState extends State<_StudentHome> {
     _loadData();
   }
 
+  final Map<int, bool> _enrollLoading = {};
+
   Future<void> _loadData() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     try {
       final summary = await _api.getAttendanceSummary();
+      // Sort: Enrolled courses first
+      summary.sort((a, b) {
+        if (a.isEnrolled && !b.isEnrolled) return -1;
+        if (!a.isEnrolled && b.isEnrolled) return 1;
+        return a.courseCode.compareTo(b.courseCode);
+      });
+      if (!mounted) return;
       setState(() {
         _summary = summary;
         _isLoading = false;
@@ -195,10 +205,35 @@ class _StudentHomeState extends State<_StudentHome> {
     }
   }
 
+  Future<void> _enrollCourse(AttendanceSummaryModel s) async {
+    setState(() => _enrollLoading[s.courseId] = true);
+    try {
+      final result = await _api.enrollCourse(s.courseId);
+      if (result['success'] == true) {
+        _loadData();
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Action completed'),
+            backgroundColor: result['success'] == true ? AppColors.success : AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _enrollLoading[s.courseId] = false);
+      }
+    }
+  }
+
   int get _overallPercentage {
-    if (_summary.isEmpty) return 0;
-    final total = _summary.fold(0, (a, b) => a + b.attendancePercentage);
-    return total ~/ _summary.length;
+    final enrolled = _summary.where((s) => s.isEnrolled).toList();
+    if (enrolled.isEmpty) return 0;
+    final total = enrolled.fold(0, (a, b) => a + b.attendancePercentage);
+    return total ~/ enrolled.length;
   }
 
   int get _belowThresholdCount => _summary.where((s) => s.belowThreshold).length;
@@ -313,9 +348,9 @@ class _StudentHomeState extends State<_StudentHome> {
                                 children: [
                                   _quickStat('ATTENDANCE', '$_overallPercentage%'),
                                   _statDivider(),
-                                  _quickStat('COURSES', '${_summary.length}'),
+                                  _quickStat('MY COURSES', '${_summary.where((s) => s.isEnrolled).length}'),
                                   _statDivider(),
-                                  _quickStat('STATUS', _overallPercentage >= 80 ? 'OK' : 'RISK'),
+                                  _quickStat('AVAILABLE', '${_summary.where((s) => !s.isEnrolled).length}'),
                                 ],
                               ),
                             ),
@@ -520,6 +555,28 @@ class _StudentHomeState extends State<_StudentHome> {
                       ),
                     ),
                   ],
+                ),
+              ),
+            
+            if (!s.isEnrolled)
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: _enrollLoading[s.courseId] == true ? null : () => _enrollCourse(s),
+                    icon: _enrollLoading[s.courseId] == true 
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.add_circle_outline_rounded, size: 18),
+                    label: const Text('ENROLL IN THIS COURSE'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
                 ),
               ),
           ],

@@ -9,6 +9,7 @@ class CourseModel {
   final String? department;
   final int credits;
   final int studentCount;
+  final bool isEnrolled;
 
   CourseModel({
     required this.id,
@@ -19,6 +20,7 @@ class CourseModel {
     this.department,
     this.credits = 3,
     this.studentCount = 0,
+    this.isEnrolled = false,
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class CourseModel {
       department: json['department'],
       credits: json['credits'] ?? 3,
       studentCount: json['student_count'] ?? 0,
+      isEnrolled: json['is_enrolled'] ?? false,
     );
   }
 
@@ -44,6 +47,7 @@ class CourseModel {
       'department': department,
       'credits': credits,
       'student_count': studentCount,
+      'is_enrolled': isEnrolled,
     };
   }
 }
@@ -131,6 +135,7 @@ class AttendanceSummaryModel {
   final bool belowThreshold;
   final int attendedSessions;
   final int totalSessions;
+  final bool isEnrolled;
 
   AttendanceSummaryModel({
     required this.courseId,
@@ -140,6 +145,7 @@ class AttendanceSummaryModel {
     required this.belowThreshold,
     required this.attendedSessions,
     required this.totalSessions,
+    this.isEnrolled = true,
   });
 
   factory AttendanceSummaryModel.fromJson(Map<String, dynamic> json) {
@@ -151,6 +157,7 @@ class AttendanceSummaryModel {
       belowThreshold: json['below_threshold'] ?? false,
       attendedSessions: json['attended_sessions'] ?? 0,
       totalSessions: json['total_sessions'] ?? 0,
+      isEnrolled: json['is_enrolled'] ?? true,
     );
   }
 }

@@ -243,11 +243,15 @@ def attendance_summary_alt(request):
     if user.is_staff or user.is_superuser:
         return attendance_summary_view(request)
         
-    enrolled_courses = user.courses_enrolled.all()
+    # Get all active courses in the system to automatically show them on the student dashboard
+    all_courses = Course.objects.filter(is_active=True).select_related('lecturer')
     summary = []
     
-    for course in enrolled_courses:
-        # Get all completed sessions for this course
+    for course in all_courses:
+        # Check if student is explicitly enrolled
+        is_enrolled = course.students.filter(id=user.id).exists()
+        
+        # Get all completed/active sessions for this course
         total_sessions = AttendanceSession.objects.filter(
             course=course, 
             status__in=['active', 'completed']
@@ -271,7 +275,8 @@ def attendance_summary_alt(request):
             'attendance_percentage': percentage,
             'below_threshold': percentage < 80 and total_sessions > 0,
             'attended_sessions': attended_sessions,
-            'total_sessions': total_sessions
+            'total_sessions': total_sessions,
+            'is_enrolled': is_enrolled
         })
         
     return Response(summary, status=status.HTTP_200_OK)

@@ -42,7 +42,7 @@ class AuthService {
         Uri.parse(AppConstants.loginUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'username': username, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 45));
 
       print('Login status: ${response.statusCode}');
       print('Login body: ${response.body}');
@@ -76,7 +76,7 @@ class AuthService {
       }
     } catch (e) {
       print('Login error exception: $e');
-      return {'success': false, 'error': 'Connection failed check your internet connection and try again'};
+      return {'success': false, 'error': 'Connection failed ($e). Check internet or try again in a minute.'};
     }
   }
 
@@ -86,7 +86,7 @@ class AuthService {
         Uri.parse(AppConstants.registerUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(userData),
-      );
+      ).timeout(const Duration(seconds: 45));
 
       print('Registration status: ${response.statusCode}');
       print('Registration body: ${response.body}');
@@ -118,7 +118,7 @@ class AuthService {
       }
     } catch (e) {
       print('Registration error exception: $e');
-      return {'success': false, 'error': 'Connection failed check your internet connection and try again'};
+      return {'success': false, 'error': 'Connection failed ($e). Check internet or try again in a minute.'};
     }
   }
 
@@ -174,18 +174,23 @@ class AuthService {
       };
 
   Future<Map<String, dynamic>> getUserProfile() async {
-    final response = await http.get(
-      Uri.parse(AppConstants.userProfileUrl),
-      headers: authHeaders,
-    );
+    try {
+      final response = await http.get(
+        Uri.parse(AppConstants.userProfileUrl),
+        headers: authHeaders,
+      ).timeout(const Duration(seconds: 45));
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      _currentUser = UserModel.fromJson(data);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_userKey, jsonEncode(data));
-      return {'success': true, 'user': _currentUser};
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _currentUser = UserModel.fromJson(data);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_userKey, jsonEncode(data));
+        return {'success': true, 'user': _currentUser};
+      }
+      return {'success': false, 'error': 'Failed to load profile (${response.statusCode})'};
+    } catch (e) {
+      print('Profile error exception: $e');
+      return {'success': false, 'error': 'Connection failed ($e)'};
     }
-    return {'success': false, 'error': 'Failed to load profile'};
   }
 }

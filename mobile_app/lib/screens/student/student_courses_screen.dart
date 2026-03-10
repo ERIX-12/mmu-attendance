@@ -202,7 +202,7 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
   }
 
   Widget _buildCourseList({required bool isEnrolled}) {
-    final courses = _filtered;
+    final courses = _filtered.where((c) => c.isEnrolled == isEnrolled).toList();
     if (courses.isEmpty) {
       return Center(
         child: Padding(

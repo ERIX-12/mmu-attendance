@@ -54,8 +54,9 @@ class ApiService {
 
   // ─── Courses ─────────────────────────────────────────────────────────────────
 
-  Future<List<CourseModel>> getCourses() async {
-    final response = await _get(AppConstants.coursesUrl);
+  Future<List<CourseModel>> getCourses({bool available = true}) async {
+    final url = available ? '${AppConstants.coursesUrl}?available=true' : AppConstants.coursesUrl;
+    final response = await _get(url);
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
       return data.map((e) => CourseModel.fromJson(e)).toList();

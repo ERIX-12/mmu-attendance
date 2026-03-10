@@ -26,13 +26,20 @@ class CourseSerializer(serializers.ModelSerializer):
     students = UserSerializer(many=True, read_only=True)
     student_count = serializers.SerializerMethodField()
     course_code = serializers.CharField(source='code')
+    is_enrolled = serializers.SerializerMethodField()
     
     class Meta:
         model = Course
         fields = ['id', 'name', 'code', 'course_code', 'description', 'credits', 'faculty', 'department', 
                   'lecturer', 'lecturer_id', 'lecturer_detail', 'students', 'student_count', 
-                  'created_at', 'updated_at', 'is_active']
-        read_only_fields = ['id', 'lecturer', 'lecturer_detail', 'students', 'student_count', 'created_at', 'updated_at']
+                  'is_enrolled', 'created_at', 'updated_at', 'is_active']
+        read_only_fields = ['id', 'lecturer', 'lecturer_detail', 'students', 'student_count', 'is_enrolled', 'created_at', 'updated_at']
+    
+    def get_is_enrolled(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.students.filter(id=request.user.id).exists()
+        return False
     
     def get_student_count(self, obj):
         return obj.students.count()
