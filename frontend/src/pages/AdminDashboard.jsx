@@ -328,6 +328,9 @@ function UsersTab({ users, onRefresh }) {
         password: 'Temp@12345', confirm_password: 'Temp@12345',
         role: 'student', student_number: '', staff_id: '', faculty: '', department: '', year_of_study: ''
     });
+
+    const studentDefaultPass = 'Temp@12345';
+    const lecturerDefaultPass = 'Lecturer@123';
     const [saving, setSaving] = useState(false);
 
     const [editingUser, setEditingUser] = useState(null);
@@ -337,7 +340,7 @@ function UsersTab({ users, onRefresh }) {
         setEditingUser(null);
         setForm({
             username: '', email: '', first_name: '', last_name: '',
-            password: 'Temp@12345', confirm_password: 'Temp@12345',
+            password: studentDefaultPass, confirm_password: studentDefaultPass,
             role: 'student', student_number: '', staff_id: '', faculty: '', department: '', year_of_study: ''
         });
         setOpen(true);
@@ -480,7 +483,27 @@ function UsersTab({ users, onRefresh }) {
                     <TextField label="Email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} fullWidth required />
                     <FormControl fullWidth required>
                         <InputLabel>Role</InputLabel>
-                        <Select value={form.role} label="Role" onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}>
+                        <Select
+                            value={form.role}
+                            label="Role"
+                            onChange={(e) => {
+                                const newRole = e.target.value;
+                                setForm((f) => {
+                                    const next = { ...f, role: newRole };
+                                    // If still using default passwords, update them based on role
+                                    if (!editingUser) {
+                                        if (newRole === 'lecturer' && f.password === studentDefaultPass) {
+                                            next.password = lecturerDefaultPass;
+                                            next.confirm_password = lecturerDefaultPass;
+                                        } else if (newRole === 'student' && f.password === lecturerDefaultPass) {
+                                            next.password = studentDefaultPass;
+                                            next.confirm_password = studentDefaultPass;
+                                        }
+                                    }
+                                    return next;
+                                });
+                            }}
+                        >
                             {['admin', 'lecturer', 'student'].map((r) => <MenuItem key={r} value={r}>{r}</MenuItem>)}
                         </Select>
                     </FormControl>

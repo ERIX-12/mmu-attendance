@@ -275,6 +275,12 @@ def reset_password_view(request):
             user = User.objects.get(username=username)
             
         temp_password = "Temp@12345"
+        try:
+            if hasattr(user, 'profile') and user.profile.role == 'lecturer':
+                temp_password = "Lecturer@123"
+        except:
+            pass
+            
         user.set_password(temp_password)
         user.save()
         
