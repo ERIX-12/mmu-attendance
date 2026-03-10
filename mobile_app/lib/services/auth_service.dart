@@ -78,25 +78,13 @@ class AuthService {
       body: jsonEncode(userData),
     );
 
-    print('Register Status: ${response.statusCode}');
-    print('Register Response: ${response.body}');
-
     final data = jsonDecode(response.body);
 
     if (response.statusCode == 201) {
-      _accessToken = data['access'];
-      final userJson = data['user'];
-      _currentUser = UserModel.fromJson(userJson);
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_accessTokenKey, data['access']);
-      await prefs.setString(_refreshTokenKey, data['refresh']);
-      await prefs.setString(_userKey, jsonEncode(userJson));
-
-      return {'success': true, 'user': _currentUser};
+      // Backend no longer returns tokens on registration to enforce login step
+      return {'success': true, 'message': data['message'] ?? 'Registration successful'};
     } else {
       // Parse Django validation errors into user-friendly messages
-      // Django returns errors as {field: [message1, message2], ...}
       String errorMessage = 'Registration failed';
       if (data is Map) {
         final errors = <String>[];

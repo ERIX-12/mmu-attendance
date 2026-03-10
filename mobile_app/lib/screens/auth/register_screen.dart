@@ -3,8 +3,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../utils/constants.dart';
-import '../student/student_dashboard.dart';
-import '../lecturer/lecturer_dashboard.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -113,27 +111,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
 
       if (result['success'] == true) {
-        final user = result['user'];
-        Widget nextScreen;
-        if (user.role == 'student') {
-          nextScreen = const StudentDashboard();
-        } else {
-          nextScreen = const LecturerDashboard();
-        }
-
+        if (!mounted) return;
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Registration successful! Welcome to MMU Attendance.'),
+            content: const Text('Registration successful! Please sign in with your credentials.'),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
 
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => nextScreen),
-          (route) => false,
-        );
+        // Go back to login screen
+        Navigator.of(context).pop();
       } else {
         setState(() {
           _errorMessage = result['error'] ?? 'Registration failed';
