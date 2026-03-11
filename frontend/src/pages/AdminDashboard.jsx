@@ -168,7 +168,7 @@ function CoursesTab({ courses, users, onRefresh }) {
         setSaving(true);
         try {
             const payload = {
-                course_code: form.course_code,
+                code: form.course_code,
                 name: form.name,
                 credits: form.credits,
                 lecturer_id: form.lecturer,

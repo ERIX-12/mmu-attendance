@@ -25,7 +25,7 @@ class CourseSerializer(serializers.ModelSerializer):
     lecturer_detail = serializers.SerializerMethodField()
     students = UserSerializer(many=True, read_only=True)
     student_count = serializers.SerializerMethodField()
-    course_code = serializers.CharField(source='code')
+    course_code = serializers.SerializerMethodField()
     is_enrolled = serializers.SerializerMethodField()
     
     class Meta:
@@ -51,6 +51,9 @@ class CourseSerializer(serializers.ModelSerializer):
                 'full_name': f"{obj.lecturer.first_name} {obj.lecturer.last_name}"
             }
         return None
+
+    def get_course_code(self, obj):
+        return obj.code
 
     def create(self, validated_data):
         lecturer_id = validated_data.pop('lecturer_id')
