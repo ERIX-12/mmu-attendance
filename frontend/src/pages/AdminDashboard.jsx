@@ -185,8 +185,8 @@ function CoursesTab({ courses, users, onRefresh }) {
             setOpen(false);
             await onRefresh();
         } catch (e) {
-            console.error('Course save error details:', e.response?.data || e);
             const errData = e.response?.data;
+            console.error('Course save error details:', JSON.stringify(errData || e, null, 2));
             let errMsg = 'Failed to save course changes';
             
             if (errData && typeof errData === 'object') {
@@ -380,8 +380,8 @@ function UsersTab({ users, onRefresh }) {
             setOpen(false);
             await onRefresh();
         } catch (e) {
-            console.error('User save error details:', e.response?.data || e);
             const errData = e.response?.data;
+            console.error('User save error details:', JSON.stringify(errData || e, null, 2));
             let errMsg = 'Failed to save user account';
             
             if (errData && typeof errData === 'object') {
