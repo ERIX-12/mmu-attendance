@@ -33,7 +33,7 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'code', 'course_code', 'description', 'credits', 'faculty', 'department', 
                   'lecturer', 'lecturer_id', 'lecturer_detail', 'students', 'student_count', 
                   'is_enrolled', 'created_at', 'updated_at', 'is_active']
-        read_only_fields = ['id', 'lecturer', 'lecturer_detail', 'students', 'student_count', 'is_enrolled', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'lecturer', 'lecturer_detail', 'students', 'student_count', 'course_code', 'is_enrolled', 'created_at', 'updated_at']
     
     def get_is_enrolled(self, obj):
         request = self.context.get('request')

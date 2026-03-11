@@ -185,28 +185,20 @@ function CoursesTab({ courses, users, onRefresh }) {
             setOpen(false);
             await onRefresh();
         } catch (e) {
-            console.error('Detailed save error:', e.response?.data || e);
+            console.error('Course save error details:', e.response?.data || e);
             const errData = e.response?.data;
-            let errMsg = 'Failed to save course';
+            let errMsg = 'Failed to save course changes';
             
-            if (errData) {
-                if (typeof errData === 'string') {
-                    errMsg = errData.substring(0, 100);
-                } else if (typeof errData === 'object') {
-                    // Flatten error object into readable string
-                    const messages = [];
-                    for (const [key, value] of Object.entries(errData)) {
-                        const fieldName = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
-                        if (Array.isArray(value)) {
-                            messages.push(`${fieldName}: ${value[0]}`);
-                        } else if (typeof value === 'string') {
-                            messages.push(`${fieldName}: ${value}`);
-                        } else {
-                            messages.push(`${fieldName}: ${JSON.stringify(value)}`);
-                        }
-                    }
-                    errMsg = messages.join(' | ') || 'Validation error';
-                }
+            if (errData && typeof errData === 'object') {
+                const list = [];
+                Object.entries(errData).forEach(([key, val]) => {
+                    const label = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
+                    const content = Array.isArray(val) ? val[0] : (typeof val === 'object' ? JSON.stringify(val) : val);
+                    list.push(`${label}: ${content}`);
+                });
+                if (list.length > 0) errMsg = list.join(' | ');
+            } else if (typeof errData === 'string') {
+                errMsg = errData.substring(0, 150);
             }
             toast.error(errMsg);
         } finally { setSaving(false); }
@@ -388,27 +380,20 @@ function UsersTab({ users, onRefresh }) {
             setOpen(false);
             await onRefresh();
         } catch (e) {
-            console.error('Detailed user save error:', e.response?.data || e);
+            console.error('User save error details:', e.response?.data || e);
             const errData = e.response?.data;
-            let errMsg = 'Failed to save user';
+            let errMsg = 'Failed to save user account';
             
-            if (errData) {
-                if (typeof errData === 'string') {
-                    errMsg = errData.substring(0, 100);
-                } else if (typeof errData === 'object') {
-                    const messages = [];
-                    for (const [key, value] of Object.entries(errData)) {
-                        const fieldName = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
-                        if (Array.isArray(value)) {
-                            messages.push(`${fieldName}: ${value[0]}`);
-                        } else if (typeof value === 'string') {
-                            messages.push(`${fieldName}: ${value}`);
-                        } else {
-                            messages.push(`${fieldName}: ${JSON.stringify(value)}`);
-                        }
-                    }
-                    errMsg = messages.join(' | ') || 'Validation error';
-                }
+            if (errData && typeof errData === 'object') {
+                const list = [];
+                Object.entries(errData).forEach(([key, val]) => {
+                    const label = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
+                    const content = Array.isArray(val) ? val[0] : (typeof val === 'object' ? JSON.stringify(val) : val);
+                    list.push(`${label}: ${content}`);
+                });
+                if (list.length > 0) errMsg = list.join(' | ');
+            } else if (typeof errData === 'string') {
+                errMsg = errData.substring(0, 150);
             }
             toast.error(errMsg);
         } finally { setSaving(false); }
