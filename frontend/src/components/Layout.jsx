@@ -24,8 +24,10 @@ const NAV_ITEMS = {
         { label: 'Overview', icon: <Dashboard />, path: '/admin' },
         { label: 'Courses', icon: <School />, path: '/admin/courses' },
         { label: 'Users', icon: <People />, path: '/admin/users' },
+        { label: 'Analytics', icon: <BarChart />, path: '/admin/analytics' },
         { label: 'Sessions', icon: <EventNote />, path: '/admin/sessions' },
         { label: 'Reports', icon: <Assessment />, path: '/admin/reports' },
+        { label: 'Settings', icon: <SettingsIcon />, path: '/admin/settings' },
     ],
     lecturer: [
         { label: 'Overview', icon: <Dashboard />, path: '/lecturer' },
