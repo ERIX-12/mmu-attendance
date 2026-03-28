@@ -283,17 +283,17 @@ function Overview({ courses, users, sessions = [] }) {
         </Box>
     );
 
-    const NavIcon = ({ icon, label, onClick }) => (
+    const AppNavIcon = ({ icon, label, onClick }) => (
         <Box 
             onClick={onClick}
             sx={{ 
-                display: 'flex', alignItems: 'center', gap: 2, p: 1.2, borderRadius: 2.5, 
-                cursor: 'pointer', '&:hover': { bgcolor: itemBg },
-                color: subTextColor, bgcolor: 'transparent', mb: 0.5
+                display: 'flex', alignItems: 'center', gap: 2.5, p: 1.5, borderRadius: 2, 
+                cursor: 'pointer', '&:hover': { bgcolor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0, 0, 0, 0.04)' },
+                color: isDarkMode ? 'rgba(255,255,255,0.7)' : '#535F7A', transition: 'all 0.2s', mb: 0.5
             }}
         >
-            <Box sx={{ color: 'inherit', display: 'flex', bgcolor: itemBg, p: 1, borderRadius: 2 }}>{icon}</Box>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{label}</Typography>
+            <Box sx={{ color: 'inherit', display: 'flex', fontSize: 20 }}>{icon}</Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.95rem', letterSpacing: '0.2px' }}>{label}</Typography>
         </Box>
     );
 
@@ -457,17 +457,26 @@ function Overview({ courses, users, sessions = [] }) {
 
                 <Grid item xs={12} lg={3}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        <Box sx={glassStyle}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: textColor }}>App</Typography>
-                                <IconButton size="small" sx={{ bgcolor: itemBg }}><FormatListBulleted sx={{ fontSize: 16, color: subTextColor }} /></IconButton>
+                        <Box sx={{ 
+                            ...glassStyle, 
+                            borderRadius: '35px 35px 20px 20px', 
+                            bgcolor: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : '#F4F7FE' 
+                        }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, px: 1 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 800, color: isDarkMode ? '#fff' : '#1B254B', fontSize: '1.25rem' }}>App</Typography>
+                                <IconButton size="small" sx={{ bgcolor: isDarkMode ? 'rgba(255,255,255,0.05)' : '#E9EDF7', borderRadius: 2.5, p: 1 }}>
+                                    <FormatListBulleted sx={{ fontSize: 18, color: isDarkMode ? 'rgba(255,255,255,0.6)' : '#A3AED0' }} />
+                                </IconButton>
                             </Box>
-                            <NavIcon icon={<Assessment sx={{ fontSize: 18 }} />} label="Attendance Logs" onClick={() => navigate('/admin/sessions')} />
-                            <NavIcon icon={<People sx={{ fontSize: 18 }} />} label="User Directory" onClick={() => navigate('/admin/users')} />
-                            <NavIcon icon={<School sx={{ fontSize: 18 }} />} label="Courses List" onClick={() => navigate('/admin/courses')} />
-                            <NavIcon icon={<Timeline sx={{ fontSize: 18 }} />} label="System Analytics" onClick={() => navigate('/admin/analytics')} />
-                            <NavIcon icon={<TextSnippet sx={{ fontSize: 18 }} />} label="Report Center" onClick={() => navigate('/admin/reports')} />
-                            <NavIcon icon={<SupportAgent sx={{ fontSize: 18 }} />} label="Help Desk" onClick={() => toast('Support center feature coming soon!', { icon: '🤝' })} />
+                            
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                <AppNavIcon icon={<CalendarToday />} label="Calendar" onClick={() => navigate('/admin/sessions')} />
+                                <AppNavIcon icon={<FormatListBulleted />} label="Tasks" onClick={() => navigate('/admin/users')} />
+                                <AppNavIcon icon={<ChatBubbleOutline />} label="Messages" onClick={() => toast.info('Messages coming soon')} />
+                                <AppNavIcon icon={<FolderOpen />} label="File Manager" onClick={() => navigate('/admin/courses')} />
+                                <AppNavIcon icon={<TextSnippet />} label="Notes" onClick={() => navigate('/admin/reports')} />
+                                <AppNavIcon icon={<SupportAgent />} label="Support" onClick={() => toast('Support center feature coming soon!', { icon: '🤝' })} />
+                            </Box>
                         </Box>
 
                         <Box sx={glassStyle}>
@@ -1454,17 +1463,17 @@ function SettingsTab({ users, courses }) {
         </Box>
     );
 
-    const NavIcon = ({ icon, label, onClick }) => (
+    const AppNavIcon = ({ icon, label, onClick }) => (
         <Box 
             onClick={onClick}
             sx={{ 
-                display: 'flex', alignItems: 'center', gap: 2, p: 1.5, borderRadius: 2, 
-                cursor: 'pointer', '&:hover': { bgcolor: itemBg },
-                color: subTextColor, transition: 'all 0.2s'
+                display: 'flex', alignItems: 'center', gap: 2.5, p: 1.5, borderRadius: 2, 
+                cursor: 'pointer', '&:hover': { bgcolor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0, 0, 0, 0.04)' },
+                color: isDarkMode ? 'rgba(255,255,255,0.7)' : '#535F7A', transition: 'all 0.2s', mb: 0.5
             }}
         >
-            <Box sx={{ color: 'inherit', display: 'flex' }}>{icon}</Box>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>{label}</Typography>
+            <Box sx={{ color: 'inherit', display: 'flex', fontSize: 20 }}>{icon}</Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.95rem', letterSpacing: '0.2px' }}>{label}</Typography>
         </Box>
     );
 
@@ -1657,21 +1666,25 @@ function SettingsTab({ users, courses }) {
                 {/* Right Column (App & Actions) */}
                 <Grid item xs={12} lg={3}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, height: '100%' }}>
-                        <Box sx={glassStyle}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: textColor }}>App</Typography>
-                                <IconButton size="small" sx={{ bgcolor: itemBg, borderRadius: 2 }}>
-                                    <FormatListBulleted sx={{ fontSize: 16, color: subTextColor }} />
+                        <Box sx={{ 
+                            ...glassStyle, 
+                            borderRadius: '35px 35px 20px 20px', 
+                            bgcolor: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : '#F4F7FE' 
+                        }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, px: 1 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 800, color: isDarkMode ? '#fff' : '#1B254B', fontSize: '1.25rem' }}>App</Typography>
+                                <IconButton size="small" sx={{ bgcolor: isDarkMode ? 'rgba(255,255,255,0.05)' : '#E9EDF7', borderRadius: 2.5, p: 1 }}>
+                                    <FormatListBulleted sx={{ fontSize: 18, color: isDarkMode ? 'rgba(255,255,255,0.6)' : '#A3AED0' }} />
                                 </IconButton>
                             </Box>
                             
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                <NavIcon icon={<Assessment sx={{ fontSize: 18 }} />} label="Attendance Logs" onClick={() => navigate('/admin/sessions')} />
-                                <NavIcon icon={<People sx={{ fontSize: 18 }} />} label="User Directory" onClick={() => navigate('/admin/users')} />
-                                <NavIcon icon={<School sx={{ fontSize: 18 }} />} label="Courses List" onClick={() => navigate('/admin/courses')} />
-                                <NavIcon icon={<Timeline sx={{ fontSize: 18 }} />} label="System Analytics" onClick={() => navigate('/admin/analytics')} />
-                                <NavIcon icon={<TextSnippet sx={{ fontSize: 18 }} />} label="Report Center" onClick={() => navigate('/admin/reports')} />
-                                <NavIcon icon={<SupportAgent sx={{ fontSize: 18 }} />} label="Support" onClick={() => toast('Support center feature coming soon!', { icon: '🤝' })} />
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                <AppNavIcon icon={<CalendarToday />} label="Calendar" onClick={() => navigate('/admin/sessions')} />
+                                <AppNavIcon icon={<FormatListBulleted />} label="Tasks" onClick={() => navigate('/admin/users')} />
+                                <AppNavIcon icon={<ChatBubbleOutline />} label="Messages" onClick={() => toast.info('Messages coming soon')} />
+                                <AppNavIcon icon={<FolderOpen />} label="File Manager" onClick={() => navigate('/admin/courses')} />
+                                <AppNavIcon icon={<TextSnippet />} label="Notes" onClick={() => navigate('/admin/reports')} />
+                                <AppNavIcon icon={<SupportAgent />} label="Support" onClick={() => toast('Support center feature coming soon!', { icon: '🤝' })} />
                             </Box>
                         </Box>
 
