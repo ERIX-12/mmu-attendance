@@ -1,6 +1,20 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Course, Enrollment
+from .models import Course, Enrollment, Faculty, Department
+
+
+class FacultySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Faculty
+        fields = ['id', 'name', 'description', 'created_at']
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    faculty_name = serializers.ReadOnlyField(source='faculty.name')
+    
+    class Meta:
+        model = Department
+        fields = ['id', 'name', 'faculty', 'faculty_name', 'description', 'created_at']
+
 
 
 class UserSerializer(serializers.ModelSerializer):

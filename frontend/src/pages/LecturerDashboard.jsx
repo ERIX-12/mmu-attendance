@@ -179,7 +179,7 @@ function SessionsTab({ courses }) {
 
     useEffect(() => {
         fetchSessions();
-        pollRef.current = setInterval(fetchSessions, 30000); // poll every 30s
+        pollRef.current = setInterval(fetchSessions, 10000); // Poll every 10s for real-time updates
         return () => clearInterval(pollRef.current);
     }, []);
 

@@ -12,7 +12,7 @@ SECRET_KEY=')1*OW"tvSO&av|#+;E7RIrV7!TESa`,Y_L9WHIcbA]6/pZRB9'
 DEBUG=False
 SECRET_KEY=')1*OW"tvSO&av|#+;E7RIrV7!TESa`,Y_L9WHIcbA]6/pZRB9'
 DATABASE_URL=postgresql://postgres:password@localhost:5432/mmu_attendance
-ALLOWED_HOSTS=*
+ALLOWED_HOSTS=*ana
 ```
 
 ### **How to Add:**

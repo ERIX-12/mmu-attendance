@@ -73,9 +73,10 @@ export default function StatCard({ title, value, subtitle, icon, color = 'primar
                             {title}
                         </Typography>
                         <Typography
-                            variant="h3"
+                            variant="h4"
                             sx={{
                                 fontWeight: 800,
+                                fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' },
                                 lineHeight: 1,
                                 background: `linear-gradient(45deg, ${theme.palette.text.primary} 30%, ${c} 100%)`,
                                 WebkitBackgroundClip: 'text',

@@ -12,6 +12,7 @@ import 'scan_qr_screen.dart';
 import 'student_courses_screen.dart';
 import 'attendance_history_screen.dart';
 import 'student_profile_screen.dart';
+import 'notifications_screen.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -168,6 +169,7 @@ class _StudentHomeState extends State<_StudentHome> {
   final AuthService _auth = AuthService();
 
   List<AttendanceSummaryModel> _summary = [];
+  int _unreadNotifications = 0;
   bool _isLoading = true;
   String? _error;
 
@@ -184,15 +186,21 @@ class _StudentHomeState extends State<_StudentHome> {
     setState(() => _isLoading = true);
     try {
       final summary = await _api.getAttendanceSummary();
+      final notifications = await _api.getNotifications();
+      
       // Sort: Enrolled courses first
       summary.sort((a, b) {
         if (a.isEnrolled && !b.isEnrolled) return -1;
         if (!a.isEnrolled && b.isEnrolled) return 1;
         return a.courseCode.compareTo(b.courseCode);
       });
+      
+      final unreadCount = notifications.where((n) => !n.isRead).length;
+
       if (!mounted) return;
       setState(() {
         _summary = summary;
+        _unreadNotifications = unreadCount;
         _isLoading = false;
       });
     } catch (e) {
@@ -261,6 +269,43 @@ class _StudentHomeState extends State<_StudentHome> {
                 'MMU ATTENDANCE',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3),
               ),
+              actions: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                        ).then((_) => _loadData());
+                      },
+                    ),
+                    if (_unreadNotifications > 0)
+                      Positioned(
+                        right: 12,
+                        top: 12,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            _unreadNotifications.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 8),
+              ],
               flexibleSpace: FlexibleSpaceBar(
                 stretchModes: const [StretchMode.zoomBackground],
                 background: Stack(

@@ -8,8 +8,13 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
-from .models import UserProfile
+from .models import UserProfile, Notification
 
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'title', 'message', 'is_read', 'created_at']
 
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
@@ -420,3 +425,56 @@ def user_detail_view(request, user_id):
             
         user.delete()
         return Response({'message': 'User deleted successfully'}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def notifications_list_view(request):
+    """Get notifications for current user"""
+    notifications = request.user.notifications.all()
+    serializer = NotificationSerializer(notifications, many=True)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def send_notification_view(request):
+    """Send notification to a specific user"""
+    if not request.user.is_staff:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+    
+    student_id = request.data.get('student_id')
+    message = request.data.get('message')
+    title = request.data.get('title', 'Attendance Warning')
+    
+    if not student_id or not message:
+        return Response({'error': 'student_id and message are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    # Try finding by student_number first, as frontend passes student_number here
+    student = User.objects.filter(profile__student_number=student_id).first()
+    
+    if not student:
+        # Fallback to username, because reports view falls back to username if student_number is empty
+        student = User.objects.filter(username=student_id).first()
+        
+    if not student:
+        try:
+            # Fallback to ID
+            student = User.objects.get(id=student_id)
+        except (User.DoesNotExist, ValueError):
+            return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+             
+    Notification.objects.create(
+        user=student,
+        title=title,
+        message=message
+    )
+    return Response({'message': 'Notification sent successfully'}, status=status.HTTP_201_CREATED)
+
+@api_view(['PATCH'])
+def mark_notification_read_view(request, pk):
+    """Mark a notification as read"""
+    try:
+        notification = request.user.notifications.get(id=pk)
+        notification.is_read = True
+        notification.save()
+        return Response({'message': 'Marked as read'})
+    except Notification.DoesNotExist:
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)

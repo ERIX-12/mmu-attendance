@@ -23,6 +23,10 @@ class AppConstants {
   static const String markAttendanceUrl = '$apiUrl/sessions/attendance/mark/';
   static const String attendanceRecordsUrl = '$apiUrl/sessions/attendance/records/';
 
+  // Notification endpoints
+  static const String notificationsUrl = '$apiUrl/auth/notifications/';
+  static const String readNotificationUrl = '$apiUrl/auth/notifications/';
+
   // App info
   static const String appName = 'MMU Attendance';
   static const String appVersion = '1.0.0';

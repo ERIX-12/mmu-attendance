@@ -23,7 +23,7 @@ import {
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import Layout from '../components/Layout';
 import StatCard from '../components/StatCard';
-import { coursesApi, authApi, sessionsApi, reportsApi } from '../api/client';
+import { coursesApi, authApi, sessionsApi, reportsApi, notificationsApi, facultiesApi, departmentsApi } from '../api/client';
 import toast from 'react-hot-toast';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import useSettingsStore from '../context/useSettingsStore';
@@ -69,7 +69,14 @@ function DashboardHeader({ title, subtitle, showWelcome = false, users = [], cou
 
     return (
         <>
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ 
+                mb: 4, 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                justifyContent: 'space-between', 
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                gap: 2
+            }}>
                 <Box>
                     {showWelcome ? (
                         <>
@@ -538,7 +545,7 @@ function Overview({ courses, users, sessions = [] }) {
     );
 }
 
-function CoursesTab({ courses, users, onRefresh }) {
+function CoursesTab({ courses, users, faculties = [], departments = [], onRefresh }) {
     const [open, setOpen] = useState(false);
     const [form, setForm] = useState({ course_code: '', name: '', credits: 3, lecturer: '', faculty: '', department: '' });
     const [saving, setSaving] = useState(false);
@@ -675,16 +682,30 @@ function CoursesTab({ courses, users, onRefresh }) {
                         <InputLabel>Faculty</InputLabel>
                         <Select value={form.faculty} label="Faculty" onChange={(e) => setForm((f) => ({ ...f, faculty: e.target.value, department: '' }))}>
                             <MenuItem value=""><em>None</em></MenuItem>
-                            {FACULTIES.map((fac) => <MenuItem key={fac} value={fac}>{fac}</MenuItem>)}
+                            {faculties.length > 0 ? (
+                                faculties.map((f) => <MenuItem key={f.id} value={f.name}>{f.name}</MenuItem>)
+                            ) : (
+                                FACULTIES.map((fac) => <MenuItem key={fac} value={fac}>{fac}</MenuItem>)
+                            )}
                         </Select>
                     </FormControl>
                     <FormControl fullWidth required disabled={!form.faculty}>
                         <InputLabel>Department</InputLabel>
                         <Select value={form.department} label="Department" onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}>
                             <MenuItem value=""><em>None</em></MenuItem>
-                            {(FACULTY_DEPARTMENTS[form.faculty] || []).map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)}
+                            {faculties.length > 0 ? (
+                                departments
+                                    .filter(d => {
+                                        const fac = faculties.find(f => f.name === form.faculty);
+                                        return fac && d.faculty === fac.id;
+                                    })
+                                    .map((dept) => <MenuItem key={dept.id} value={dept.name}>{dept.name}</MenuItem>)
+                            ) : (
+                                (FACULTY_DEPARTMENTS[form.faculty] || []).map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)
+                            )}
                         </Select>
                     </FormControl>
+
                     <FormControl fullWidth required>
                         <InputLabel>Lecturer</InputLabel>
                         <Select value={form.lecturer} label="Lecturer" onChange={(e) => setForm((f) => ({ ...f, lecturer: e.target.value }))}>
@@ -720,7 +741,7 @@ function CoursesTab({ courses, users, onRefresh }) {
     );
 }
 
-function UsersTab({ users, onRefresh }) {
+function UsersTab({ users, faculties = [], departments = [], onRefresh }) {
     const navigate = useNavigate();
     const location = useLocation();
     const [open, setOpen] = useState(false);
@@ -928,16 +949,30 @@ function UsersTab({ users, onRefresh }) {
                         <InputLabel>Faculty</InputLabel>
                         <Select value={form.faculty} label="Faculty" onChange={(e) => setForm((f) => ({ ...f, faculty: e.target.value, department: '' }))}>
                             <MenuItem value=""><em>None</em></MenuItem>
-                            {FACULTIES.map((fac) => <MenuItem key={fac} value={fac}>{fac}</MenuItem>)}
+                            {faculties.length > 0 ? (
+                                faculties.map((f) => <MenuItem key={f.id} value={f.name}>{f.name}</MenuItem>)
+                            ) : (
+                                FACULTIES.map((fac) => <MenuItem key={fac} value={fac}>{fac}</MenuItem>)
+                            )}
                         </Select>
                     </FormControl>
                     <FormControl fullWidth disabled={!form.faculty}>
                         <InputLabel>Department</InputLabel>
                         <Select value={form.department} label="Department" onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}>
                             <MenuItem value=""><em>None</em></MenuItem>
-                            {(FACULTY_DEPARTMENTS[form.faculty] || []).map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)}
+                            {faculties.length > 0 ? (
+                                departments
+                                    .filter(d => {
+                                        const fac = faculties.find(f => f.name === form.faculty);
+                                        return fac && d.faculty === fac.id;
+                                    })
+                                    .map((dept) => <MenuItem key={dept.id} value={dept.name}>{dept.name}</MenuItem>)
+                            ) : (
+                                (FACULTY_DEPARTMENTS[form.faculty] || []).map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)
+                            )}
                         </Select>
                     </FormControl>
+
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpen(false)}>Cancel</Button>
@@ -1055,9 +1090,12 @@ function AllSessionsTab() {
 
 function ReportsTab({ courses }) {
     const [selectedCourse, setSelectedCourse] = useState('');
-    const [threshold, setThreshold] = useState(80);
+    const [threshold, setThreshold] = useState(75);
     const [loading, setLoading] = useState(false);
     const [atRisk, setAtRisk] = useState(null);
+    const [messageOpen, setMessageOpen] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [messageText, setMessageText] = useState('');
 
     const handleDownload = async (type) => {
         if (!selectedCourse) return toast.error('Select a course first');
@@ -1117,7 +1155,7 @@ function ReportsTab({ courses }) {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                {['Student Number', 'Name', 'Attended', 'Total', 'Percentage'].map((h) => (
+                                {['Student Number', 'Name', 'Attended', 'Total', 'Percentage', 'Actions'].map((h) => (
                                     <TableCell key={h} sx={{ fontWeight: 700 }}>{h}</TableCell>
                                 ))}
                             </TableRow>
@@ -1132,87 +1170,314 @@ function ReportsTab({ courses }) {
                                     <TableCell>
                                         <Chip label={`${s.percentage}%`} size="small" color="error" />
                                     </TableCell>
+                                    <TableCell>
+                                        <Button 
+                                            size="small" 
+                                            variant="outlined" 
+                                            color="warning" 
+                                            startIcon={<ChatBubbleOutline />}
+                                            onClick={() => {
+                                                setSelectedStudent(s);
+                                                setMessageText(`Warning: Your attendance in ${atRisk.course} has fallen to ${s.percentage}%. Please ensure you attend the remaining sessions or contact your lecturer.`);
+                                                setMessageOpen(true);
+                                            }}
+                                        >
+                                            Send Warning
+                                        </Button>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
             )}
+
+            <Dialog open={messageOpen} onClose={() => setMessageOpen(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>Send Warning Message</DialogTitle>
+                <DialogContent sx={{ pt: 2 }}>
+                    <Typography variant="body2" sx={{ mb: 2, mt: 1 }}>
+                        Sending warning to: <b>{selectedStudent?.full_name}</b> ({selectedStudent?.student_number})
+                    </Typography>
+                    <TextField
+                        multiline
+                        rows={4}
+                        fullWidth
+                        label="Message"
+                        variant="outlined"
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions sx={{ p: 3 }}>
+                    <Button onClick={() => setMessageOpen(false)}>Cancel</Button>
+                    <Button 
+                        variant="contained" 
+                        color="warning" 
+                        onClick={async () => {
+                            try {
+                                await notificationsApi.send({
+                                    student_id: selectedStudent.student_number,
+                                    message: messageText,
+                                    title: 'Attendance Warning'
+                                });
+                                toast.success(`Warning message successfully sent to ${selectedStudent?.full_name}`);
+                            } catch (e) {
+                                toast.error('Failed to send warning message');
+                            }
+                            setMessageOpen(false);
+                        }}
+                    >
+                        Send Message
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
+    );
+}
+
+function FacultyManagementDialog({ open, onClose, onRefresh, initialData }) {
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (initialData) {
+            setName(initialData.name || '');
+            setDescription(initialData.description || '');
+        } else {
+            setName('');
+            setDescription('');
+        }
+    }, [initialData, open]);
+
+    const handleSubmit = async () => {
+        if (!name) return toast.error('Name is required');
+        setLoading(true);
+        try {
+            if (initialData) {
+                await facultiesApi.update(initialData.id, { name, description });
+                toast.success('Faculty updated successfully');
+            } else {
+                await facultiesApi.create({ name, description });
+                toast.success('Faculty created successfully');
+            }
+            onRefresh();
+            onClose();
+            setName('');
+            setDescription('');
+        } catch {
+            toast.error('Failed to create faculty');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+            <DialogTitle sx={{ fontWeight: 700 }}>{initialData ? 'Edit Faculty' : 'Add New Faculty'}</DialogTitle>
+            <DialogContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                    <TextField label="Faculty Name" fullWidth value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. FACULTY OF EDUCATION" />
+                    <TextField label="Description" fullWidth multiline rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+                </Box>
+            </DialogContent>
+            <DialogActions sx={{ p: 3 }}>
+                <Button onClick={onClose} color="inherit">Cancel</Button>
+                <Button onClick={handleSubmit} variant="contained" disabled={loading}>
+                    {loading ? (initialData ? 'Updating...' : 'Creating...') : (initialData ? 'Update Faculty' : 'Create Faculty')}
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+}
+
+function DepartmentManagementDialog({ open, onClose, faculties, onRefresh }) {
+    const [name, setName] = useState('');
+    const [facultyId, setFacultyId] = useState('');
+    const [description, setDescription] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async () => {
+        if (!name || !facultyId) return toast.error('Name and Faculty are required');
+        setLoading(true);
+        try {
+            await departmentsApi.create({ name, faculty: facultyId, description });
+            toast.success('Department added successfully');
+            onRefresh();
+            onClose();
+            setName('');
+            setFacultyId('');
+            setDescription('');
+        } catch {
+            toast.error('Failed to add department');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+            <DialogTitle sx={{ fontWeight: 700 }}>Add New Department</DialogTitle>
+            <DialogContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                    <FormControl fullWidth>
+                        <InputLabel>Select Faculty</InputLabel>
+                        <Select value={facultyId} label="Select Faculty" onChange={(e) => setFacultyId(e.target.value)}>
+                            {faculties.map(f => <MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <TextField label="Department Name" fullWidth value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Computer Science" />
+                    <TextField label="Description" fullWidth multiline rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+                </Box>
+            </DialogContent>
+            <DialogActions sx={{ p: 3 }}>
+                <Button onClick={onClose} color="inherit">Cancel</Button>
+                <Button onClick={handleSubmit} variant="contained" disabled={loading}>{loading ? 'Adding...' : 'Add Department'}</Button>
+            </DialogActions>
+        </Dialog>
     );
 }
 
 function FacultiesTab() {
     const [stats, setStats] = useState([]);
+    const [dbFaculties, setDbFaculties] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [facultyDialogOpen, setFacultyDialogOpen] = useState(false);
+    const [editingFaculty, setEditingFaculty] = useState(null);
+    const [deleteConfirm, setDeleteConfirm] = useState(null);
+    const [deptDialogOpen, setDeptDialogOpen] = useState(false);
 
-    const fetchStats = async () => {
+    const fetchData = async () => {
         try {
-            const { data } = await reportsApi.facultyStats();
-            setStats(data);
+            const [statsRes, facultiesRes] = await Promise.all([
+                reportsApi.facultyStats(),
+                facultiesApi.list()
+            ]);
+            setStats(statsRes.data);
+            setDbFaculties(facultiesRes.data);
         } catch {
-            toast.error('Failed to load faculty stats');
+            toast.error('Failed to load faculty data');
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchStats();
+        fetchData();
     }, []);
+
+    const handleEditFaculty = (fac) => {
+        setEditingFaculty(fac);
+        setFacultyDialogOpen(true);
+    };
+
+    const handleDeleteFaculty = async () => {
+        if (!deleteConfirm) return;
+        try {
+            await facultiesApi.delete(deleteConfirm.id);
+            toast.success('Faculty deleted successfully');
+            setDeleteConfirm(null);
+            fetchData();
+        } catch {
+            toast.error('Failed to delete faculty. Ensure it has no dependent departments or courses.');
+        }
+    };
 
     if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
 
     return (
         <Box>
-            <Typography variant="h6" sx={{ mb: 2 }}>Faculty & Department Attendance Overview</Typography>
-            {stats.map((faculty) => (
-                <Card key={faculty.faculty} sx={{ mb: 3 }}>
-                    <CardHeader
-                        title={faculty.faculty}
-                        subheader={`Overall Attendance: ${faculty.attendance_rate}% | Total Enrollments: ${faculty.total_enrollments} | Total Sessions: ${faculty.total_sessions}`}
-                    />
-                    <TableContainer>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: 700 }}>Department</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Sessions</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Total Enrollments</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Attended</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Attendance Rate</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {faculty.departments.map((dept) => (
-                                    <TableRow key={dept.department}>
-                                        <TableCell>{dept.department}</TableCell>
-                                        <TableCell>{dept.total_sessions}</TableCell>
-                                        <TableCell>{dept.total_enrollments}</TableCell>
-                                        <TableCell>{dept.total_attended}</TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={`${dept.attendance_rate}%`}
-                                                size="small"
-                                                color={dept.attendance_rate >= 80 ? 'success' : (dept.attendance_rate >= 60 ? 'warning' : 'error')}
-                                            />
-                                        </TableCell>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h6">Faculty & Department Management</Typography>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button variant="outlined" startIcon={<Add />} onClick={() => setFacultyDialogOpen(true)}>New Faculty</Button>
+                    <Button variant="contained" startIcon={<Add />} onClick={() => setDeptDialogOpen(true)}>Add Department</Button>
+                </Box>
+            </Box>
+
+            {stats.map((faculty) => {
+                const dbFaculty = dbFaculties.find(f => f.name === faculty.faculty);
+                return (
+                    <Card key={faculty.faculty} sx={{ mb: 3 }}>
+                        <CardHeader
+                            title={faculty.faculty}
+                            action={dbFaculty && (
+                                <Box>
+                                    <IconButton size="small" onClick={() => handleEditFaculty(dbFaculty)} color="primary">
+                                        <Edit fontSize="small" />
+                                    </IconButton>
+                                    <IconButton size="small" onClick={() => setDeleteConfirm(dbFaculty)} color="error">
+                                        <Delete fontSize="small" />
+                                    </IconButton>
+                                </Box>
+                            )}
+                            subheader={`Overall Attendance: ${faculty.attendance_rate}% | Total Enrollments: ${faculty.total_enrollments} | Total Sessions: ${faculty.total_sessions}`}
+                        />
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{ fontWeight: 700 }}>Department</TableCell>
+                                        <TableCell sx={{ fontWeight: 700 }}>Sessions</TableCell>
+                                        <TableCell sx={{ fontWeight: 700 }}>Total Enrollments</TableCell>
+                                        <TableCell sx={{ fontWeight: 700 }}>Attended</TableCell>
+                                        <TableCell sx={{ fontWeight: 700 }}>Attendance Rate</TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Card>
-            ))}
+                                </TableHead>
+                                <TableBody>
+                                    {faculty.departments.map((dept) => (
+                                        <TableRow key={dept.department}>
+                                            <TableCell>{dept.department}</TableCell>
+                                            <TableCell>{dept.total_sessions}</TableCell>
+                                            <TableCell>{dept.total_enrollments}</TableCell>
+                                            <TableCell>{dept.total_attended}</TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={`${dept.attendance_rate}%`}
+                                                    size="small"
+                                                    color={dept.attendance_rate >= 80 ? 'success' : (dept.attendance_rate >= 60 ? 'warning' : 'error')}
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Card>
+                );
+            })}
             {stats.length === 0 && (
                 <Typography color="text.secondary">No attendance data available yet.</Typography>
             )}
+
+            <FacultyManagementDialog 
+                open={facultyDialogOpen} 
+                onClose={() => { setFacultyDialogOpen(false); setEditingFaculty(null); }} 
+                onRefresh={fetchData} 
+                initialData={editingFaculty}
+            />
+            <DepartmentManagementDialog open={deptDialogOpen} onClose={() => setDeptDialogOpen(false)} faculties={dbFaculties} onRefresh={fetchData} />
+
+            {/* Delete Faculty Confirmation */}
+            <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)}>
+                <DialogTitle>Delete Faculty</DialogTitle>
+                <DialogContent>
+                    <Typography>Are you sure you want to delete <b>{deleteConfirm?.name}</b>?</Typography>
+                    <Typography variant="caption" color="error">This will fail if there are departments or courses assigned to this faculty.</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+                    <Button onClick={handleDeleteFaculty} variant="contained" color="error">Delete</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
+
     );
 }
 
 
-function AnalyticsTab({ users, courses }) {
+
+function AnalyticsTab({ users, courses, faculties = [] }) {
     const { isDarkMode } = useSettingsStore();
     const theme = useTheme();
     
@@ -1234,8 +1499,9 @@ function AnalyticsTab({ users, courses }) {
     const roleCount = (role) => users.filter(u => u.role === role).length;
     const activeUsers = users.filter(u => u.is_active).length;
 
-    // Faculty breakdown data - Using the predefined FACULTIES list to ensure all are shown
-    const facultyData = FACULTIES.map(fac => {
+    // Faculty breakdown data - Using the dynamic faculties list if available
+    const facultyList = faculties.length > 0 ? faculties.map(f => f.name) : FACULTIES;
+    const facultyData = facultyList.map(fac => {
         const facUsers = users.filter(u => u.faculty === fac);
         return {
             name: fac.replace('FACULTY OF ', ''),
@@ -1730,6 +1996,72 @@ function SettingsTab({ users, courses }) {
     );
 }
 
+function LecturerPerformanceTab() {
+    const [stats, setStats] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchStats = async () => {
+        try {
+            const { data } = await reportsApi.lecturerStats();
+            setStats(data);
+        } catch {
+            toast.error('Failed to load lecturer performance stats');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
+
+    if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>;
+
+    return (
+        <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>Lecturer Performance Overview</Typography>
+            <Card sx={{ mb: 3 }}>
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{ fontWeight: 700 }}>Lecturer Name</TableCell>
+                                <TableCell sx={{ fontWeight: 700 }}>Faculty / Dept</TableCell>
+                                <TableCell sx={{ fontWeight: 700 }}>Assigned Courses</TableCell>
+                                <TableCell sx={{ fontWeight: 700 }}>Total Sessions</TableCell>
+                                <TableCell sx={{ fontWeight: 700 }}>Avg Attendance Rate</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {stats.map((lecturer) => (
+                                <TableRow key={lecturer.lecturer_id} hover>
+                                    <TableCell sx={{ fontWeight: 600 }}>{lecturer.full_name}</TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2">{lecturer.faculty || 'Unassigned'}</Typography>
+                                        <Typography variant="caption" color="text.secondary">{lecturer.department || 'Unassigned'}</Typography>
+                                    </TableCell>
+                                    <TableCell>{lecturer.total_courses}</TableCell>
+                                    <TableCell>{lecturer.total_sessions}</TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={`${lecturer.attendance_rate}%`}
+                                            size="small"
+                                            color={lecturer.attendance_rate >= 80 ? 'success' : (lecturer.attendance_rate >= 60 ? 'warning' : 'error')}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Card>
+            {stats.length === 0 && (
+                <Typography color="text.secondary">No lecturer performance data available yet.</Typography>
+            )}
+        </Box>
+    );
+}
+
 export default function AdminDashboard() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -1738,16 +2070,23 @@ export default function AdminDashboard() {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const [dbFaculties, setDbFaculties] = useState([]);
+    const [dbDepartments, setDbDepartments] = useState([]);
+
     const fetchAll = async () => {
         try {
-            const [cRes, uRes, sRes] = await Promise.all([
+            const [cRes, uRes, sRes, fRes, dRes] = await Promise.all([
                 coursesApi.list({ all: true }),
                 authApi.listUsers(),
                 sessionsApi.list(),
+                facultiesApi.list(),
+                departmentsApi.list(),
             ]);
             setCourses(cRes.data.results || cRes.data);
             setUsers(uRes.data.results || uRes.data);
             setSessions(sRes.data.results || sRes.data);
+            setDbFaculties(fRes.data);
+            setDbDepartments(dRes.data);
         } catch { toast.error('Failed to load data'); }
         finally { setLoading(false); }
     };
@@ -1765,6 +2104,7 @@ export default function AdminDashboard() {
         { label: 'Sessions', path: '/admin/sessions' },
         { label: 'Reports', path: '/admin/reports' },
         { label: 'Faculties & Depts', path: '/admin/faculties' },
+        { label: 'Lecturer Performance', path: '/admin/lecturers' },
         { label: 'Analytics', path: '/admin/analytics' },
         { label: 'Settings', path: '/admin/settings' },
     ];
@@ -1796,13 +2136,15 @@ export default function AdminDashboard() {
             ) : (
                 <Routes>
                     <Route index element={<Overview courses={courses} users={users} sessions={sessions} />} />
-                    <Route path="courses" element={<CoursesTab courses={courses} users={users} onRefresh={fetchAll} />} />
-                    <Route path="users" element={<UsersTab users={users} onRefresh={fetchAll} />} />
+                    <Route path="courses" element={<CoursesTab courses={courses} users={users} faculties={dbFaculties} departments={dbDepartments} onRefresh={fetchAll} />} />
+                    <Route path="users" element={<UsersTab users={users} faculties={dbFaculties} departments={dbDepartments} onRefresh={fetchAll} />} />
                     <Route path="sessions" element={<AllSessionsTab />} />
                     <Route path="reports" element={<ReportsTab courses={courses} />} />
                     <Route path="faculties" element={<FacultiesTab />} />
-                    <Route path="analytics" element={<AnalyticsTab users={users} courses={courses} />} />
+                    <Route path="lecturers" element={<LecturerPerformanceTab />} />
+                    <Route path="analytics" element={<AnalyticsTab users={users} courses={courses} faculties={dbFaculties} />} />
                     <Route path="settings" element={<SettingsTab users={users} courses={courses} />} />
+
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Routes>
             )}

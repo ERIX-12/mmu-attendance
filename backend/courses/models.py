@@ -1,6 +1,26 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class Faculty(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class Department(models.Model):
+    name = models.CharField(max_length=200)
+    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='departments')
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['name', 'faculty']
+
+    def __str__(self):
+        return f"{self.name} ({self.faculty.name})"
+
 
 class Course(models.Model):
     name = models.CharField(max_length=200)

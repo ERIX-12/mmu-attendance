@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import {
     QrCodeScanner, CheckCircle, Assignment, School,
-    History, EventBusy, LibraryBooks
+    History, EventBusy, LibraryBooks, Notifications
 } from '@mui/icons-material';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import {
@@ -16,7 +16,7 @@ import {
 import { Bar } from 'react-chartjs-2';
 import Layout from '../components/Layout';
 import StatCard from '../components/StatCard';
-import { coursesApi, attendanceApi } from '../api/client';
+import { coursesApi, attendanceApi, notificationsApi } from '../api/client';
 import useAuthStore from '../context/authStore';
 import toast from 'react-hot-toast';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
@@ -229,6 +229,74 @@ function EnrollTab({ onEnrollChange }) {
     );
 }
 
+// ─── Notifications Tab ────────────────────────────────────────────────────────
+function NotificationsTab() {
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchNotifications = async () => {
+        try {
+            const { data } = await notificationsApi.list();
+            setNotifications(data);
+        } catch { toast.error('Failed to load notifications'); }
+        finally { setLoading(false); }
+    };
+
+    useEffect(() => { 
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 10000); // Check for new alerts every 10s
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleMarkRead = async (id) => {
+        try {
+            await notificationsApi.markRead(id);
+            setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n));
+        } catch { toast.error('Failed to mark read'); }
+    };
+
+    if (loading) return <CircularProgress />;
+
+    return (
+        <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>My Notifications</Typography>
+            {notifications.length === 0 ? (
+                <Typography color="text.secondary">No notifications found.</Typography>
+            ) : (
+                <Grid container spacing={2}>
+                    {notifications.map(n => (
+                        <Grid item xs={12} key={n.id}>
+                            <Card sx={{ 
+                                borderLeft: n.is_read ? '4px solid transparent' : '4px solid #E53935',
+                                bgcolor: n.is_read ? 'background.paper' : alpha('#E53935', 0.02)
+                            }}>
+                                <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <Box sx={{ flexGrow: 1, pr: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: n.is_read ? 500 : 700, color: n.is_read ? 'text.primary' : 'error.main' }}>
+                                            {n.title}
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ whiteSpace: 'pre-line', mt: 0.5, color: 'text.secondary' }}>
+                                            {n.message}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.disabled" sx={{ mt: 1, display: 'block' }}>
+                                            {new Date(n.created_at).toLocaleString()}
+                                        </Typography>
+                                    </Box>
+                                    {!n.is_read && (
+                                        <Button size="small" variant="outlined" color="primary" onClick={() => handleMarkRead(n.id)}>
+                                            Mark as Read
+                                        </Button>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            )}
+        </Box>
+    );
+}
+
 // ─── Main Student Dashboard ────────────────────────────────────────────────────
 export default function StudentDashboard() {
     const navigate = useNavigate();
@@ -245,7 +313,11 @@ export default function StudentDashboard() {
         finally { setLoading(false); }
     };
 
-    useEffect(() => { fetchSummary(); }, []);
+    useEffect(() => { 
+        fetchSummary();
+        const interval = setInterval(fetchSummary, 10000); // Sync attendance percentages automatically
+        return () => clearInterval(interval);
+    }, []);
 
     const totalClasses = summary.reduce((a, c) => a + c.total_sessions, 0);
     const totalAttended = summary.reduce((a, c) => a + c.attended_sessions, 0);
@@ -256,6 +328,7 @@ export default function StudentDashboard() {
         { label: 'Enroll', path: '/student/enroll', icon: <LibraryBooks /> },
         { label: 'Scan QR', path: '/student/scan', icon: <QrCodeScanner /> },
         { label: 'History', path: '/student/history', icon: <History /> },
+        { label: 'Notifications', path: '/student/notifications', icon: <Notifications /> },
     ];
 
     const currentTab = tabs.findIndex(t => t.path === location.pathname) === -1
@@ -361,6 +434,7 @@ export default function StudentDashboard() {
                                 <Route path="enroll" element={<EnrollTab onEnrollChange={fetchSummary} />} />
                                 <Route path="scan" element={<ScanTab onScanSuccess={fetchSummary} />} />
                                 <Route path="history" element={<HistoryTab />} />
+                                <Route path="notifications" element={<NotificationsTab />} />
                                 <Route path="*" element={<Navigate to="/student" replace />} />
                             </Routes>
                         </Box>

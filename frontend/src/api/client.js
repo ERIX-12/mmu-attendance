@@ -75,6 +75,13 @@ export const authApi = {
     changePassword: (id, data) => api.post(`auth/users/${id}/change_password/`, data),
 };
 
+// ─── Notifications ─────────────────────────────────────────────────────────────
+export const notificationsApi = {
+    list: () => api.get('auth/notifications/'),
+    send: (data) => api.post('auth/notifications/send/', data),
+    markRead: (id) => api.patch(`auth/notifications/${id}/read/`),
+};
+
 // ─── Courses ──────────────────────────────────────────────────────────────────
 export const coursesApi = {
     list: (params) => api.get('courses/', { params }),
@@ -87,6 +94,23 @@ export const coursesApi = {
     deleteEnrollment: (id) => api.delete(`courses/enrollments/${id}/`),
     enroll: (id) => api.post(`courses/${id}/enroll/`),
     unenroll: (id) => api.delete(`courses/${id}/unenroll/`),
+};
+
+// ─── Faculties & Departments ──────────────────────────────────────────────────
+export const facultiesApi = {
+    list: () => api.get('courses/faculties/'),
+    get: (id) => api.get(`courses/faculties/${id}/`),
+    create: (data) => api.post('courses/faculties/', data),
+    update: (id, data) => api.patch(`courses/faculties/${id}/`, data),
+    delete: (id) => api.delete(`courses/faculties/${id}/`),
+};
+
+export const departmentsApi = {
+    list: (params) => api.get('courses/departments/', { params }),
+    get: (id) => api.get(`courses/departments/${id}/`),
+    create: (data) => api.post('courses/departments/', data),
+    update: (id, data) => api.patch(`courses/departments/${id}/`, data),
+    delete: (id) => api.delete(`courses/departments/${id}/`),
 };
 
 // ─── Sessions ─────────────────────────────────────────────────────────────────
@@ -118,6 +142,7 @@ export const reportsApi = {
     belowThreshold: (courseId, params) =>
         api.get(`reports/${courseId}/below-threshold/`, { params }),
     facultyStats: () => api.get('reports/faculties/'),
+    lecturerStats: () => api.get('reports/lecturers/'),
 };
 
 export default api;

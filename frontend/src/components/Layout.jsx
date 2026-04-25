@@ -10,6 +10,7 @@ import {
     Menu as MenuIcon, Dashboard, School, People, Assignment,
     BarChart, Logout, AccountCircle, QrCode, EventNote,
     CheckCircle, Warning, Assessment, Settings as SettingsIcon, CameraAlt,
+    FolderOpen, Timeline,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
@@ -24,9 +25,11 @@ const NAV_ITEMS = {
         { label: 'Overview', icon: <Dashboard />, path: '/admin' },
         { label: 'Courses', icon: <School />, path: '/admin/courses' },
         { label: 'Users', icon: <People />, path: '/admin/users' },
-        { label: 'Analytics', icon: <BarChart />, path: '/admin/analytics' },
+        { label: 'Faculties & Depts', icon: <FolderOpen />, path: '/admin/faculties' },
+        { label: 'Performance', icon: <Timeline />, path: '/admin/lecturers' },
         { label: 'Sessions', icon: <EventNote />, path: '/admin/sessions' },
         { label: 'Reports', icon: <Assessment />, path: '/admin/reports' },
+        { label: 'Analytics', icon: <BarChart />, path: '/admin/analytics' },
         { label: 'Settings', icon: <SettingsIcon />, path: '/admin/settings' },
     ],
     lecturer: [

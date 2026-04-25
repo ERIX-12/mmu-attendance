@@ -10,4 +10,7 @@ urlpatterns = [
     path('users/me/', views.user_profile_view, name='user_profile'),
     path('users/', views.users_list_view, name='users_list'),
     path('users/<int:user_id>/', views.user_detail_view, name='user_detail'),
+    path('notifications/', views.notifications_list_view, name='notifications_list'),
+    path('notifications/send/', views.send_notification_view, name='send_notification'),
+    path('notifications/<int:pk>/read/', views.mark_notification_read_view, name='mark_notification_read'),
 ]

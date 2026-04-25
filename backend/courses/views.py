@@ -5,8 +5,38 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Course, Enrollment
-from .serializers import CourseSerializer, EnrollmentSerializer, UserSerializer
+from .models import Course, Enrollment, Faculty, Department
+from .serializers import CourseSerializer, EnrollmentSerializer, UserSerializer, FacultySerializer, DepartmentSerializer
+from rest_framework import viewsets
+
+
+class FacultyViewSet(viewsets.ModelViewSet):
+    queryset = Faculty.objects.all()
+    serializer_class = FacultySerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminUser()]
+        if self.action == 'list':
+            return [AllowAny()]
+        return super().get_permissions()
+
+
+class DepartmentViewSet(viewsets.ModelViewSet):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_fields = ['faculty']
+    
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminUser()]
+        if self.action == 'list':
+            return [AllowAny()]
+        return super().get_permissions()
+
+
 
 
 class CourseListCreateView(generics.ListCreateAPIView):

@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/course_model.dart';
+import '../models/notification_model.dart';
 import '../utils/constants.dart';
 import 'auth_service.dart';
 
@@ -181,5 +182,24 @@ class ApiService {
       return data.cast<Map<String, dynamic>>();
     }
     throw Exception('Failed to load session attendance');
+  }
+
+  // ─── Notifications ───────────────────────────────────────────────────────────
+
+  Future<List<NotificationModel>> getNotifications() async {
+    final response = await _get(AppConstants.notificationsUrl);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      // Depending on pagination, data could be a list or a map with a 'results' key
+      final List list = data is Map && data.containsKey('results') ? data['results'] : data;
+      return list.map((e) => NotificationModel.fromJson(e)).toList();
+    }
+    throw Exception('Failed to load notifications: ${response.statusCode}');
+  }
+
+  Future<bool> markNotificationRead(int id) async {
+    final url = '${AppConstants.readNotificationUrl}$id/read/';
+    final response = await _patch(url, {});
+    return response.statusCode == 200 || response.statusCode == 204;
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box, Card, CardContent, Typography, TextField, Button,
     InputAdornment, IconButton, CircularProgress, alpha,
@@ -8,7 +8,7 @@ import {
 import { Visibility, VisibilityOff, Lock, Person, School, Email, Badge } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { authApi } from '../api/client';
+import { authApi, facultiesApi, departmentsApi } from '../api/client';
 import useAuthStore from '../context/authStore';
 
 const FACULTIES = [
@@ -39,6 +39,24 @@ export default function LoginPage() {
     });
     const [showPass, setShowPass] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [dbFaculties, setDbFaculties] = useState([]);
+    const [dbDepartments, setDbDepartments] = useState([]);
+
+    useEffect(() => {
+        const fetchFacData = async () => {
+            try {
+                const [fRes, dRes] = await Promise.all([
+                    facultiesApi.list(),
+                    departmentsApi.list()
+                ]);
+                setDbFaculties(fRes.data);
+                setDbDepartments(dRes.data);
+            } catch (err) {
+                console.error("Error fetching faculty data:", err);
+            }
+        };
+        fetchFacData();
+    }, []);
 
     // Forgot password state
     const [forgotPassOpen, setForgotPassOpen] = useState(false);
@@ -338,7 +356,11 @@ export default function LoginPage() {
                                 <InputLabel>Faculty</InputLabel>
                                 <Select name="faculty" value={form.faculty} label="Faculty" onChange={(e) => setForm((f) => ({ ...f, faculty: e.target.value, department: '' }))}>
                                     <MenuItem value=""><em>None</em></MenuItem>
-                                    {FACULTIES.map((fac) => <MenuItem key={fac} value={fac}>{fac}</MenuItem>)}
+                                    {dbFaculties.length > 0 ? (
+                                        dbFaculties.map((fac) => <MenuItem key={fac.id} value={fac.name}>{fac.name}</MenuItem>)
+                                    ) : (
+                                        FACULTIES.map((fac) => <MenuItem key={fac} value={fac}>{fac}</MenuItem>)
+                                    )}
                                 </Select>
                             </FormControl>
 
@@ -346,9 +368,19 @@ export default function LoginPage() {
                                 <InputLabel>Department</InputLabel>
                                 <Select name="department" value={form.department} label="Department" onChange={handleChange}>
                                     <MenuItem value=""><em>None</em></MenuItem>
-                                    {(FACULTY_DEPARTMENTS[form.faculty] || []).map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)}
+                                    {dbFaculties.length > 0 ? (
+                                        dbDepartments
+                                            .filter(d => {
+                                                const faculty = dbFaculties.find(f => f.name === form.faculty);
+                                                return faculty && d.faculty === faculty.id;
+                                            })
+                                            .map((dept) => <MenuItem key={dept.id} value={dept.name}>{dept.name}</MenuItem>)
+                                    ) : (
+                                        (FACULTY_DEPARTMENTS[form.faculty] || []).map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)
+                                    )}
                                 </Select>
                             </FormControl>
+
 
                             {form.role === 'student' && (
                                 <Box sx={{ display: 'flex', gap: 2 }}>

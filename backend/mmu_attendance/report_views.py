@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.contrib.auth.models import User
 from courses.models import Course
 from attendance_sessions.models import AttendanceSession, AttendanceRecord
 from django.shortcuts import get_object_or_404
@@ -149,9 +150,21 @@ def faculty_department_stats(request):
     if not (request.user.is_superuser or request.user.is_staff):
         return JsonResponse({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
-    sessions = AttendanceSession.objects.filter(status__in=['active', 'completed']).select_related('course').prefetch_related('attendance_records', 'course__students')
+    from courses.models import Faculty, Department
+    all_faculties = Faculty.objects.prefetch_related('departments').all()
     
     stats = {}
+    for f in all_faculties:
+        stats[f.name] = {}
+        for d in f.departments.all():
+            stats[f.name][d.name] = {
+                'total_sessions': 0,
+                'total_attended': 0,
+                'total_enrollments': 0,
+            }
+
+    sessions = AttendanceSession.objects.filter(status__in=['active', 'completed']).select_related('course').prefetch_related('attendance_records', 'course__students')
+    
     for session in sessions:
         course = session.course
         faculty = course.faculty.strip() if course.faculty else ''
@@ -213,3 +226,49 @@ def faculty_department_stats(request):
         result.append(faculty_data)
         
     return JsonResponse(result, safe=False)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def lecturer_performance_stats(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+    lecturers = User.objects.filter(profile__role__in=['lecturer', 'admin']).select_related('profile')
+    stats = []
+    
+    for lecturer in lecturers:
+        courses = Course.objects.filter(lecturer=lecturer)
+        total_courses = courses.count()
+        sessions = AttendanceSession.objects.filter(lecturer=lecturer, status__in=['active', 'completed'])
+        total_sessions = sessions.count()
+        
+        # We only include lecturers who have courses, unless we want to show inactive ones too
+        if total_courses == 0 and total_sessions == 0:
+            continue
+            
+        total_attended = 0
+        total_enrollments = 0
+        
+        for session in sessions:
+            attended = session.attendance_records.filter(status='present').count()
+            enrolled = session.course.students.count()
+            total_attended += attended
+            total_enrollments += enrolled
+            
+        attendance_rate = round((total_attended / total_enrollments) * 100) if total_enrollments > 0 else 0
+        
+        stats.append({
+            'lecturer_id': lecturer.id,
+            'full_name': f"{lecturer.first_name} {lecturer.last_name}".strip() or lecturer.username,
+            'staff_id': lecturer.profile.staff_id if hasattr(lecturer, 'profile') else '',
+            'faculty': lecturer.profile.faculty if hasattr(lecturer, 'profile') else '',
+            'department': lecturer.profile.department if hasattr(lecturer, 'profile') else '',
+            'total_courses': total_courses,
+            'total_sessions': total_sessions,
+            'attendance_rate': attendance_rate,
+        })
+        
+    # Sort by total sessions descending
+    stats.sort(key=lambda x: x['total_sessions'], reverse=True)
+    return JsonResponse(stats, safe=False)
+
