@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  // Change this to your backend URL when running on a real device
-  // For emulator: use http://10.0.2.2:8000
-  // For physical device on same WiFi: use http://YOUR_PC_IP:8000
-  static const String baseUrl = 'https://mmu-attendance.onrender.com';
+  // Production backend on Fly.io
+  static const String baseUrl = 'https://mmu-attendance-backend.fly.dev';
   static const String apiUrl = '$baseUrl/api';
 
   // Auth endpoints
