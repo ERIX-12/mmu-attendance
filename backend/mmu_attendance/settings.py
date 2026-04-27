@@ -103,8 +103,8 @@ if os.environ.get('DATABASE_URL') and dj_database_url:
         conn_max_age=600,
         conn_health_checks=True,
     )
-    # Enable SSL for production DB
-    if not DEBUG:
+    # Enable SSL for production DB (only for PostgreSQL, not SQLite)
+    if not DEBUG and 'postgresql' in DATABASES['default'].get('ENGINE', ''):
         DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
 
