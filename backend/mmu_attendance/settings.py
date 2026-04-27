@@ -21,12 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '10.32.195.116', '*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1 0.0.0.0').split()
+if os.environ.get('FLY_APP_NAME'):
+    ALLOWED_HOSTS.append(f"{os.environ.get('FLY_APP_NAME')}.fly.dev")
 
 
 # Application definition
@@ -92,10 +94,13 @@ DATABASES = {
 }
 
 import dj_database_url
-db_from_env = dj_database_url.config(conn_max_age=600)
-if db_from_env:
-    DATABASES['default'].update(db_from_env)
-    # Enable SSL for production DB on Render/Cloud
+# Fly.io uses DATABASE_URL by default
+if os.environ.get('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.config(
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+    # Enable SSL for production DB
     if not DEBUG:
         DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
@@ -188,36 +193,28 @@ SIMPLE_JWT = {
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Allow all origins in development
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "https://mmu-attendance-njq8.vercel.app",
-]
+if not DEBUG:
+    CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split()
+    CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split()
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+    ]
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://10.32.195.116:5173",
-    "http://10.32.195.116:8000",
-    "https://mmu-attendance-njq8.vercel.app",
-]
-
-# Production settings
-import os
-
-# Railway specific
-if os.environ.get('RAILWAY_ENVIRONMENT'):
+# Production settings overrides
+if os.environ.get('FLY_APP_NAME') or os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('RENDER'):
     DEBUG = False
-    ALLOWED_HOSTS = ['*']
-    CORS_ALLOWED_ORIGINS = ["https://your-vercel-app.vercel.app"]
-
-# Render specific
-if os.environ.get('RENDER'):
-    DEBUG = False
-    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME', '*')]
-    # Add your Vercel URL to CORS if you have it
-    # CORS_ALLOWED_ORIGINS = ["https://your-app.vercel.app"]
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 CORS_ALLOW_CREDENTIALS = True
+
