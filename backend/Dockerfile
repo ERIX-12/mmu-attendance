@@ -22,10 +22,9 @@ COPY . .
 # We use a dummy secret key and debug=False for collectstatic
 RUN DJANGO_SECRET_KEY=dummy DEBUG=False python manage.py collectstatic --noinput
 
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["gunicorn", "mmu_attendance.wsgi:application", \
-     "--bind", "0.0.0.0:8000", \
-     "--workers", "2", \
-     "--timeout", "120", \
-     "--access-logfile", "-"]
+CMD ["/entrypoint.sh"]
