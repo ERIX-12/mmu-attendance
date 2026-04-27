@@ -35,6 +35,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
       const StudentCoursesScreen(),
       const ScanQrScreen(),
       const AttendanceHistoryScreen(),
+      const NotificationsScreen(),
       const StudentProfileScreen(),
     ]);
     _pagesBuilt = true;
@@ -80,7 +81,8 @@ class _StudentDashboardState extends State<StudentDashboard> {
                 _navItem(1, Icons.auto_stories_rounded, 'Courses'),
                 _scanButton(),
                 _navItem(3, Icons.analytics_rounded, 'Log'),
-                _navItem(4, Icons.person_rounded, 'Me'),
+                _navItem(4, Icons.notifications_rounded, 'Alerts'),
+                _navItem(5, Icons.person_rounded, 'Me'),
               ],
             ),
           ),
