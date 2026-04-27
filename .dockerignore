@@ -1,0 +1,186 @@
+# flyctl launch added from .gitignore
+# Dependencies
+**\node_modules
+**\**\node_modules
+**\.vercel
+
+# Build outputs
+**\dist
+**\build
+**\.next
+
+# Environment variables
+**\.env
+**\.env.local
+**\.env.development.local
+**\.env.test.local
+**\.env.production.local
+**\.env.*.local
+
+# IDE
+**\.vscode
+**\.idea
+**\*.swp
+**\*.swo
+
+# OS
+**\.DS_Store
+**\Thumbs.db
+
+# Python
+**\venv
+**\env
+**\__pycache__
+**\*.pyc
+**\*.pyo
+**\*.pyd
+**\.Python
+**\db.sqlite3
+
+# Django
+**\media
+**\static
+
+# Logs
+**\*.log
+**\logs
+**\build_log.txt
+
+# flyctl launch added from backend\venv\.gitignore
+# Created by venv; see https://docs.python.org/3/library/venv.html
+backend\venv\**\*
+
+# flyctl launch added from mobile_app\.gitignore
+# Miscellaneous
+mobile_app\**\*.class
+mobile_app\**\*.log
+mobile_app\**\*.pyc
+mobile_app\**\*.swp
+mobile_app\**\.DS_Store
+mobile_app\**\.atom
+mobile_app\**\.build
+mobile_app\**\.buildlog
+mobile_app\**\.history
+mobile_app\**\.svn
+mobile_app\**\.swiftpm
+mobile_app\**\migrate_working_dir
+
+# IntelliJ related
+mobile_app\**\*.iml
+mobile_app\**\*.ipr
+mobile_app\**\*.iws
+mobile_app\**\.idea
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+mobile_app\**\**\doc\api
+mobile_app\**\**\ios\Flutter\.last_build_id
+mobile_app\**\.dart_tool
+mobile_app\**\.flutter-plugins-dependencies
+mobile_app\**\.pub-cache
+mobile_app\**\.pub
+mobile_app\build
+mobile_app\coverage
+
+# Symbolication related
+mobile_app\**\app.*.symbols
+
+# Obfuscation related
+mobile_app\**\app.*.map.json
+
+# Android Studio will place build artifacts here
+mobile_app\android\app\debug
+mobile_app\android\app\profile
+mobile_app\android\app\release
+
+# flyctl launch added from mobile_app\android\.gitignore
+mobile_app\android\**\gradle-wrapper.jar
+mobile_app\android\.gradle
+mobile_app\android\captures
+mobile_app\android\gradlew
+mobile_app\android\gradlew.bat
+mobile_app\android\local.properties
+mobile_app\android\**\GeneratedPluginRegistrant.java
+mobile_app\android\**\.cxx
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+mobile_app\android\**\key.properties
+mobile_app\android\**\**\*.keystore
+mobile_app\android\**\**\*.jks
+
+# flyctl launch added from mobile_app\ios\.gitignore
+mobile_app\ios\**\**\dgph
+mobile_app\ios\**\*.mode1v3
+mobile_app\ios\**\*.mode2v3
+mobile_app\ios\**\*.moved-aside
+mobile_app\ios\**\*.pbxuser
+mobile_app\ios\**\*.perspectivev3
+mobile_app\ios\**\**\*sync
+mobile_app\ios\**\.sconsign.dblite
+mobile_app\ios\**\.tags*
+mobile_app\ios\**\**\.vagrant
+mobile_app\ios\**\**\DerivedData
+mobile_app\ios\**\Icon?
+mobile_app\ios\**\**\Pods
+mobile_app\ios\**\**\.symlinks
+mobile_app\ios\**\profile
+mobile_app\ios\**\xcuserdata
+mobile_app\ios\**\**\.generated
+mobile_app\ios\**\Flutter\App.framework
+mobile_app\ios\**\Flutter\Flutter.framework
+mobile_app\ios\**\Flutter\Flutter.podspec
+mobile_app\ios\**\Flutter\Generated.xcconfig
+mobile_app\ios\**\Flutter\ephemeral
+mobile_app\ios\**\Flutter\app.flx
+mobile_app\ios\**\Flutter\app.zip
+mobile_app\ios\**\Flutter\flutter_assets
+mobile_app\ios\**\Flutter\flutter_export_environment.sh
+mobile_app\ios\**\ServiceDefinitions.json
+mobile_app\ios\**\Runner\GeneratedPluginRegistrant.*
+
+# Exceptions to above rules.
+!mobile_app\ios\**\default.mode1v3
+!mobile_app\ios\**\default.mode2v3
+!mobile_app\ios\**\default.pbxuser
+!mobile_app\ios\**\default.perspectivev3
+
+# flyctl launch added from mobile_app\linux\.gitignore
+mobile_app\linux\**\flutter\ephemeral
+
+# flyctl launch added from mobile_app\macos\.gitignore
+# Flutter-related
+mobile_app\macos\**\**\Flutter\ephemeral
+mobile_app\macos\**\**\Pods
+
+# Xcode-related
+mobile_app\macos\**\**\dgph
+mobile_app\macos\**\**\xcuserdata
+
+# flyctl launch added from mobile_app\windows\.gitignore
+mobile_app\windows\**\flutter\ephemeral
+
+# Visual Studio user-specific files.
+mobile_app\windows\**\*.suo
+mobile_app\windows\**\*.user
+mobile_app\windows\**\*.userosscache
+mobile_app\windows\**\*.sln.docstates
+
+# Visual Studio build-related files.
+mobile_app\windows\**\x64
+mobile_app\windows\**\x86
+
+# Visual Studio cache files
+# files ending in .cache can be ignored
+mobile_app\windows\**\*.[Cc]ache
+# but keep track of directories ending in .cache
+!mobile_app\windows\**\*.[Cc]ache
+
+# flyctl launch added from venv\.gitignore
+# Created by venv; see https://docs.python.org/3/library/venv.html
+venv\**\*
+fly.toml
