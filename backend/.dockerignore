@@ -1,4 +1,17 @@
-# flyctl launch added from venv\.gitignore
-# Created by venv; see https://docs.python.org/3/library/venv.html
-venv\**\*
+# Fly.io ignore patterns
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.db.sqlite3
+db.sqlite3
+.env
+.git
+.vscode
 fly.toml
+.dockerignore
+node_modules/
+dist/
+build/
+*.log
