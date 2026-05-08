@@ -33,6 +33,8 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1 0.0.0.0').split()
 if os.environ.get('FLY_APP_NAME'):
     ALLOWED_HOSTS.append(f"{os.environ.get('FLY_APP_NAME')}.fly.dev")
+if os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
+    ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))
 
 
 # Application definition

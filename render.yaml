@@ -1,0 +1,25 @@
+databases:
+  - name: mmu-attendance-db
+    databaseName: mmu_attendance
+    user: mmu_user
+    plan: free
+
+services:
+  - type: web
+    name: mmu-attendance-backend
+    env: python
+    rootDir: backend
+    buildCommand: "bash ./render_build.sh"
+    startCommand: "gunicorn mmu_attendance.wsgi:application"
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mmu-attendance-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: WEB_CONCURRENCY
+        value: "4"
