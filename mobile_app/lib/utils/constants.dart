@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  // Production backend on Fly.io
-  static const String baseUrl = 'https://mmu-attendance-backend.fly.dev';
+  // Production backend on Render
+  static const String baseUrl = 'https://mmu-attendance-backend.onrender.com';
   static const String apiUrl = '$baseUrl/api';
 
   // Auth endpoints
