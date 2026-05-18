@@ -106,8 +106,8 @@ if os.environ.get('DATABASE_URL') and dj_database_url:
         conn_health_checks=True,
     )
     # Enable SSL for production DB (only for PostgreSQL, not SQLite)
-    if not DEBUG and 'postgresql' in DATABASES['default'].get('ENGINE', ''):
-        DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+    # dj_database_url handles ?sslmode=require from the URL if provided
+    # Internal Render DB URLs don't need SSL, external ones do.
 
 
 # Password validation
