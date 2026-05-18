@@ -11,6 +11,7 @@ class AppConstants {
   static const String refreshTokenUrl = '$apiUrl/auth/token/refresh/';
   static const String logoutUrl = '$apiUrl/auth/logout/';
   static const String userProfileUrl = '$apiUrl/auth/users/me/';
+  static const String resetPasswordUrl = '$apiUrl/auth/reset-password/';
 
   // Course endpoints
   static const String coursesUrl = '$apiUrl/courses/';
@@ -89,12 +90,12 @@ class AppColors {
   
   static List<BoxShadow> softShadow = [
     BoxShadow(
-      color: Colors.black.withOpacity(0.04),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 12,
       offset: const Offset(0, 4),
     ),
     BoxShadow(
-      color: Colors.black.withOpacity(0.02),
+      color: Colors.black.withValues(alpha: 0.02),
       blurRadius: 2,
       offset: const Offset(0, 1),
     ),
@@ -102,9 +103,11 @@ class AppColors {
   
   static List<BoxShadow> mediumShadow = [
     BoxShadow(
-      color: Colors.black.withOpacity(0.08),
+      color: Colors.black.withValues(alpha: 0.08),
       blurRadius: 24,
       offset: const Offset(0, 8),
     ),
   ];
 }
+
+

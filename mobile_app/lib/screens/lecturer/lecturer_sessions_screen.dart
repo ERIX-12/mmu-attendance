@@ -1,7 +1,6 @@
 // lib/screens/lecturer/lecturer_sessions_screen.dart
 
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import '../../models/course_model.dart';
 import '../../services/api_service.dart';
 import '../../utils/constants.dart';
@@ -82,10 +81,11 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
+                color: AppColors.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 20),
+              child: const Icon(Icons.refresh_rounded,
+                  color: AppColors.primary, size: 20),
             ),
           ),
           const SizedBox(width: 8),
@@ -99,7 +99,10 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4)),
               ],
             ),
             child: TabBar(
@@ -110,8 +113,12 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
               ),
               labelColor: Colors.white,
               unselectedLabelColor: AppColors.textMuted,
-              labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                  letterSpacing: 0.5),
+              unselectedLabelStyle:
+                  const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
               tabs: const [
                 Tab(text: 'ALL'),
                 Tab(text: 'ACTIVE'),
@@ -122,7 +129,9 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3))
+          ? const Center(
+              child: CircularProgressIndicator(
+                  color: AppColors.primary, strokeWidth: 3))
           : _error != null
               ? _buildError()
               : TabBarView(
@@ -152,19 +161,29 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
                   shape: BoxShape.circle,
                   boxShadow: AppColors.softShadow,
                 ),
-                child: Icon(Icons.event_note_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
+                child: Icon(Icons.event_note_rounded,
+                    size: 48,
+                    color: AppColors.textMuted.withValues(alpha: 0.3)),
               ),
               const SizedBox(height: 24),
               Text(
-                status == null ? 'No sessions created yet.' : 'No $status sessions found.',
+                status == null
+                    ? 'No sessions created yet.'
+                    : 'No $status sessions found.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 8),
               Text(
                 'Create a session to start tracking attendance.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    color: AppColors.textMuted.withValues(alpha: 0.7),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -226,8 +245,9 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.12),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                    color: AppColors.success.withValues(alpha: 0.12),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(28)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -235,12 +255,17 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
                       Container(
                         width: 8,
                         height: 8,
-                        decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
+                        decoration: const BoxDecoration(
+                            color: AppColors.success, shape: BoxShape.circle),
                       ),
                       const SizedBox(width: 8),
                       const Text(
                         'LIVE SESSION',
-                        style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
+                        style: TextStyle(
+                            color: AppColors.success,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1),
                       ),
                     ],
                   ),
@@ -256,7 +281,7 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.08),
+                            color: statusColor.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Icon(statusIcon, color: statusColor, size: 24),
@@ -268,14 +293,24 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
                             children: [
                               Text(
                                 session.courseCode,
-                                style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                session.title.isNotEmpty ? session.title : 'Attendance Session',
+                                session.title.isNotEmpty
+                                    ? session.title
+                                    : 'Attendance Session',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary, letterSpacing: -0.5),
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.textPrimary,
+                                    letterSpacing: -0.5),
                               ),
                             ],
                           ),
@@ -285,25 +320,32 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
                     const SizedBox(height: 20),
                     Row(
                       children: [
-                        _sessionInfoTile(Icons.calendar_today_rounded, session.date),
+                        _sessionInfoTile(
+                            Icons.calendar_today_rounded, session.date),
                         const SizedBox(width: 20),
-                        _sessionInfoTile(Icons.access_time_rounded, '${session.startTime} - ${session.endTime}'),
+                        _sessionInfoTile(Icons.access_time_rounded,
+                            '${session.startTime} - ${session.endTime}'),
                       ],
                     ),
-                    if (session.topic != null && session.topic!.isNotEmpty) ... [
+                    if (session.topic != null && session.topic!.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       _sessionInfoTile(Icons.topic_rounded, session.topic!),
                     ],
                     const SizedBox(height: 16),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
                           'MANAGE SESSION',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 1),
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.primary,
+                              letterSpacing: 1),
                         ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 14),
+                        SizedBox(width: 4),
+                        Icon(Icons.arrow_forward_rounded,
+                            color: AppColors.primary, size: 14),
                       ],
                     ),
                   ],
@@ -320,11 +362,14 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: AppColors.textMuted.withOpacity(0.5)),
+        Icon(icon, size: 14, color: AppColors.textMuted.withValues(alpha: 0.5)),
         const SizedBox(width: 6),
         Text(
           text,
-          style: TextStyle(fontSize: 12, color: AppColors.textMuted.withOpacity(0.8), fontWeight: FontWeight.w600),
+          style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textMuted.withValues(alpha: 0.8),
+              fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -335,7 +380,8 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.cloud_off_rounded, size: 56, color: AppColors.textMuted),
+          const Icon(Icons.cloud_off_rounded,
+              size: 56, color: AppColors.textMuted),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: _loadSessions,
@@ -344,7 +390,8 @@ class _LecturerSessionsScreenState extends State<LecturerSessionsScreen>
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),

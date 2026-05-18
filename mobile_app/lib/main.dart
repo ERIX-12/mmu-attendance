@@ -179,7 +179,7 @@ class _SplashRouterState extends State<_SplashRouter>
                 height: 200,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -191,7 +191,7 @@ class _SplashRouterState extends State<_SplashRouter>
                 height: 150,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -208,15 +208,15 @@ class _SplashRouterState extends State<_SplashRouter>
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             width: 2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 30,
                               spreadRadius: -10,
                             ),
@@ -245,7 +245,7 @@ class _SplashRouterState extends State<_SplashRouter>
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                           letterSpacing: 3.5,
                         ),
                       ),
@@ -255,7 +255,7 @@ class _SplashRouterState extends State<_SplashRouter>
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
-                          color: Colors.white.withOpacity(0.4),
+                          color: Colors.white.withValues(alpha: 0.4),
                           strokeWidth: 2,
                         ),
                       ),
@@ -270,3 +270,5 @@ class _SplashRouterState extends State<_SplashRouter>
     );
   }
 }
+
+

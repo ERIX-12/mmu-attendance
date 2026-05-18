@@ -1,22 +1,25 @@
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
 void main() async {
-  final url = 'https://mmu-attendance.onrender.com/api/auth/token/'; // Login endpoint usually exists
-  print('Testing connection to $url...');
+  const url =
+      'https://mmu-attendance.onrender.com/api/auth/token/'; // Login endpoint usually exists
+  stderr.writeln('Testing connection to $url...');
   try {
     final response = await http.post(
       Uri.parse(url),
       body: {'username': 'test', 'password': 'test'},
     );
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+    stderr.writeln('Response status: ${response.statusCode}');
+    stderr.writeln('Response body: ${response.body}');
     if (response.statusCode != 404) {
-      print('✅ Backend is reachable!');
+      stderr.writeln('✅ Backend is reachable!');
     } else {
-      print('❌ Backend returned 404. Check the URL.');
+      stderr.writeln('❌ Backend returned 404. Check the URL.');
     }
   } catch (e) {
-    print('❌ Connection failed: $e');
+    stderr.writeln('❌ Connection failed: $e');
   }
 }
+

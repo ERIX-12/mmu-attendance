@@ -5,7 +5,6 @@ import '../../models/course_model.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../utils/constants.dart';
-import '../../widgets/stat_card.dart';
 import '../../widgets/attendance_badge.dart';
 // login_screen imported by profile sub-screens
 import 'scan_qr_screen.dart';
@@ -62,7 +61,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -101,7 +100,9 @@ class _StudentDashboardState extends State<StudentDashboard> {
         curve: Curves.fastOutSlowIn,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.08)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(22),
         ),
         child: Column(
@@ -109,7 +110,9 @@ class _StudentDashboardState extends State<StudentDashboard> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : AppColors.textMuted.withOpacity(0.6),
+              color: isSelected
+                  ? AppColors.primary
+                  : AppColors.textMuted.withValues(alpha: 0.6),
               size: 24,
             ),
             if (isSelected) ...[
@@ -141,7 +144,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.3),
+              color: AppColors.primary.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 6),
             ),
@@ -189,14 +192,14 @@ class _StudentHomeState extends State<_StudentHome> {
     try {
       final summary = await _api.getAttendanceSummary();
       final notifications = await _api.getNotifications();
-      
+
       // Sort: Enrolled courses first
       summary.sort((a, b) {
         if (a.isEnrolled && !b.isEnrolled) return -1;
         if (!a.isEnrolled && b.isEnrolled) return 1;
         return a.courseCode.compareTo(b.courseCode);
       });
-      
+
       final unreadCount = notifications.where((n) => !n.isRead).length;
 
       if (!mounted) return;
@@ -226,9 +229,11 @@ class _StudentHomeState extends State<_StudentHome> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? 'Action completed'),
-            backgroundColor: result['success'] == true ? AppColors.success : AppColors.error,
+            backgroundColor:
+                result['success'] == true ? AppColors.success : AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -246,8 +251,6 @@ class _StudentHomeState extends State<_StudentHome> {
     return total ~/ enrolled.length;
   }
 
-  int get _belowThresholdCount => _summary.where((s) => s.belowThreshold).length;
-
   @override
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
@@ -258,7 +261,8 @@ class _StudentHomeState extends State<_StudentHome> {
         color: AppColors.primary,
         displacement: 40,
         child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics()),
           slivers: [
             SliverAppBar(
               expandedHeight: 280,
@@ -269,18 +273,24 @@ class _StudentHomeState extends State<_StudentHome> {
               centerTitle: false,
               title: const Text(
                 'MMU ATTENDANCE',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3),
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 3),
               ),
               actions: [
                 Stack(
                   alignment: Alignment.center,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                      icon: const Icon(Icons.notifications_none_rounded,
+                          color: Colors.white),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const NotificationsScreen()),
                         ).then((_) => _loadData());
                       },
                     ),
@@ -323,7 +333,7 @@ class _StudentHomeState extends State<_StudentHome> {
                       right: -60,
                       child: CircleAvatar(
                         radius: 140,
-                        backgroundColor: Colors.white.withOpacity(0.05),
+                        backgroundColor: Colors.white.withValues(alpha: 0.05),
                       ),
                     ),
                     SafeArea(
@@ -340,11 +350,15 @@ class _StudentHomeState extends State<_StudentHome> {
                                   padding: const EdgeInsets.all(3),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+                                    border: Border.all(
+                                        color:
+                                            Colors.white.withValues(alpha: 0.3),
+                                        width: 1.5),
                                   ),
                                   child: CircleAvatar(
                                     radius: 30,
-                                    backgroundColor: Colors.white.withOpacity(0.15),
+                                    backgroundColor:
+                                        Colors.white.withValues(alpha: 0.15),
                                     child: Text(
                                       user?.initials ?? 'S',
                                       style: const TextStyle(
@@ -358,12 +372,14 @@ class _StudentHomeState extends State<_StudentHome> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'HELLO,',
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.6),
+                                          color: Colors.white
+                                              .withValues(alpha: 0.6),
                                           fontSize: 12,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: 2,
@@ -387,17 +403,22 @@ class _StudentHomeState extends State<_StudentHome> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+                                border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.15),
+                                    width: 1),
                               ),
                               child: Row(
                                 children: [
-                                  _quickStat('ATTENDANCE', '$_overallPercentage%'),
+                                  _quickStat(
+                                      'ATTENDANCE', '$_overallPercentage%'),
                                   _statDivider(),
-                                  _quickStat('MY COURSES', '${_summary.where((s) => s.isEnrolled).length}'),
+                                  _quickStat('MY COURSES',
+                                      '${_summary.where((s) => s.isEnrolled).length}'),
                                   _statDivider(),
-                                  _quickStat('AVAILABLE', '${_summary.where((s) => !s.isEnrolled).length}'),
+                                  _quickStat('AVAILABLE',
+                                      '${_summary.where((s) => !s.isEnrolled).length}'),
                                 ],
                               ),
                             ),
@@ -429,17 +450,19 @@ class _StudentHomeState extends State<_StudentHome> {
                         ),
                         TextButton(
                           onPressed: () {},
-                          child: const Text('Refresh', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                          child: const Text('Refresh',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w800, fontSize: 13)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     if (_isLoading)
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.all(60),
-                          child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
+                          child: CircularProgressIndicator(
+                              color: AppColors.primary, strokeWidth: 3),
                         ),
                       )
                     else if (_error != null)
@@ -464,13 +487,14 @@ class _StudentHomeState extends State<_StudentHome> {
         children: [
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               fontSize: 9,
               fontWeight: FontWeight.w900,
               letterSpacing: 1,
@@ -481,7 +505,8 @@ class _StudentHomeState extends State<_StudentHome> {
     );
   }
 
-  Widget _statDivider() => Container(width: 1, height: 30, color: Colors.white.withOpacity(0.1));
+  Widget _statDivider() => Container(
+      width: 1, height: 30, color: Colors.white.withValues(alpha: 0.1));
 
   Widget _buildCourseAttendanceCard(AttendanceSummaryModel s) {
     final color = s.attendancePercentage >= 80
@@ -537,14 +562,16 @@ class _StudentHomeState extends State<_StudentHome> {
             const SizedBox(height: 24),
             Row(
               children: [
-                Icon(Icons.event_available_rounded, size: 16, color: AppColors.textMuted.withOpacity(0.5)),
+                Icon(Icons.event_available_rounded,
+                    size: 16,
+                    color: AppColors.textMuted.withValues(alpha: 0.5)),
                 const SizedBox(width: 8),
                 Text(
                   '${s.attendedSessions}/${s.totalSessions} sessions attended',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textMuted.withOpacity(0.8),
+                    color: AppColors.textMuted.withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -556,7 +583,7 @@ class _StudentHomeState extends State<_StudentHome> {
                   height: 10,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppColors.divider.withOpacity(0.5),
+                    color: AppColors.divider.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -564,15 +591,16 @@ class _StudentHomeState extends State<_StudentHome> {
                   duration: const Duration(milliseconds: 1200),
                   curve: Curves.fastOutSlowIn,
                   height: 10,
-                  width: (MediaQuery.of(context).size.width - 96) * (s.attendancePercentage / 100),
+                  width: (MediaQuery.of(context).size.width - 96) *
+                      (s.attendancePercentage / 100),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [color, color.withOpacity(0.8)],
+                      colors: [color, color.withValues(alpha: 0.8)],
                     ),
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: color.withOpacity(0.2),
+                        color: color.withValues(alpha: 0.2),
                         blurRadius: 6,
                         offset: const Offset(0, 3),
                       ),
@@ -586,14 +614,15 @@ class _StudentHomeState extends State<_StudentHome> {
                 margin: const EdgeInsets.only(top: 20),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.error.withOpacity(0.06),
+                  color: AppColors.error.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
-                    const Icon(Icons.warning_amber_rounded, size: 18, color: AppColors.error),
-                    const SizedBox(width: 10),
-                    const Text(
+                    Icon(Icons.warning_amber_rounded,
+                        size: 18, color: AppColors.error),
+                    SizedBox(width: 10),
+                    Text(
                       'Attendance is below required threshold',
                       style: TextStyle(
                         fontSize: 12,
@@ -604,7 +633,6 @@ class _StudentHomeState extends State<_StudentHome> {
                   ],
                 ),
               ),
-            
             if (!s.isEnrolled)
               Padding(
                 padding: const EdgeInsets.only(top: 20),
@@ -612,16 +640,24 @@ class _StudentHomeState extends State<_StudentHome> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton.icon(
-                    onPressed: _enrollLoading[s.courseId] == true ? null : () => _enrollCourse(s),
-                    icon: _enrollLoading[s.courseId] == true 
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Icon(Icons.add_circle_outline_rounded, size: 18),
+                    onPressed: _enrollLoading[s.courseId] == true
+                        ? null
+                        : () => _enrollCourse(s),
+                    icon: _enrollLoading[s.courseId] == true
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.add_circle_outline_rounded,
+                            size: 18),
                     label: const Text('ENROLL IN THIS COURSE'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
                     ),
                   ),
                 ),
@@ -636,7 +672,8 @@ class _StudentHomeState extends State<_StudentHome> {
     return Center(
       child: Column(
         children: [
-          const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.textMuted),
+          const Icon(Icons.cloud_off_rounded,
+              size: 48, color: AppColors.textMuted),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: _loadData,
@@ -645,7 +682,8 @@ class _StudentHomeState extends State<_StudentHome> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ],
@@ -666,19 +704,26 @@ class _StudentHomeState extends State<_StudentHome> {
                 shape: BoxShape.circle,
                 boxShadow: AppColors.softShadow,
               ),
-              child: Icon(Icons.library_books_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
+              child: Icon(Icons.library_books_rounded,
+                  size: 48, color: AppColors.textMuted.withValues(alpha: 0.3)),
             ),
             const SizedBox(height: 24),
             const Text(
               'No courses found.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800),
+              style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Text(
               'Enroll in courses to start tracking your attendance.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: AppColors.textMuted.withValues(alpha: 0.7),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600),
             ),
           ],
         ),

@@ -25,14 +25,14 @@ class AttendanceBadge extends StatelessWidget {
           child: CircularProgressIndicator(
             value: percentage / 100,
             strokeWidth: 5,
-            backgroundColor: _color.withOpacity(0.12),
+            backgroundColor: _color.withValues(alpha: 0.12),
             valueColor: AlwaysStoppedAnimation<Color>(_color),
             strokeCap: StrokeCap.round,
           ),
         ),
         Text(
           '$percentage%',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,

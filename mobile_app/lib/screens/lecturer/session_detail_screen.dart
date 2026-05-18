@@ -62,12 +62,16 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('End Session?'),
-        content: const Text('This will close the session and mark absent students. This cannot be undone.'),
+        content: const Text(
+            'This will close the session and mark absent students. This cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('End Session', style: TextStyle(color: Colors.red)),
+            child:
+                const Text('End Session', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -135,10 +139,11 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.08),
+                  color: AppColors.primary.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.qr_code_2_rounded, color: AppColors.primary, size: 20),
+                child: const Icon(Icons.qr_code_2_rounded,
+                    color: AppColors.primary, size: 20),
               ),
               tooltip: 'Refresh QR',
             ),
@@ -172,42 +177,39 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     Color statusColor;
     String statusLabel;
     IconData statusIcon;
-    Gradient statusGradient;
 
     switch (_session.status) {
       case 'active':
         statusColor = AppColors.success;
         statusLabel = 'SESSION IS LIVE';
         statusIcon = Icons.sensors_rounded;
-        statusGradient = LinearGradient(colors: [statusColor, statusColor.withOpacity(0.8)]);
         break;
       case 'completed':
         statusColor = AppColors.textMuted;
         statusLabel = 'SESSION COMPLETED';
         statusIcon = Icons.task_alt_rounded;
-        statusGradient = LinearGradient(colors: [statusColor, statusColor.withOpacity(0.7)]);
         break;
       default:
         statusColor = AppColors.warning;
         statusLabel = 'SESSION PENDING';
         statusIcon = Icons.hourglass_empty_rounded;
-        statusGradient = const LinearGradient(colors: [Color(0xFFFFA000), Color(0xFFFFC107)]);
     }
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.08),
+        color: statusColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: statusColor.withOpacity(0.12), width: 1.5),
+        border:
+            Border.all(color: statusColor.withValues(alpha: 0.12), width: 1.5),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.15),
+              color: statusColor.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(statusIcon, color: statusColor, size: 28),
@@ -266,16 +268,19 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          _infoRow(Icons.book_rounded, 'Course', '${_session.courseCode} · ${_session.courseName}'),
+          _infoRow(Icons.book_rounded, 'Course',
+              '${_session.courseCode} · ${_session.courseName}'),
           _divider(),
           _infoRow(Icons.calendar_month_rounded, 'Date', _session.date),
           _divider(),
-          _infoRow(Icons.access_time_filled_rounded, 'Time Range', '${_session.startTime} — ${_session.endTime}'),
-          if (_session.venue != null && _session.venue!.isNotEmpty) ... [
+          _infoRow(Icons.access_time_filled_rounded, 'Time Range',
+              '${_session.startTime} — ${_session.endTime}'),
+          if (_session.venue != null && _session.venue!.isNotEmpty) ...[
             _divider(),
-            _infoRow(Icons.location_on_rounded, 'Venue Location', _session.venue!),
+            _infoRow(
+                Icons.location_on_rounded, 'Venue Location', _session.venue!),
           ],
-          if (_session.topic != null && _session.topic!.isNotEmpty) ... [
+          if (_session.topic != null && _session.topic!.isNotEmpty) ...[
             _divider(),
             _infoRow(Icons.topic_rounded, 'Topic Title', _session.topic!),
           ],
@@ -289,7 +294,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.primary.withOpacity(0.5), size: 18),
+          Icon(icon, color: AppColors.primary.withValues(alpha: 0.5), size: 18),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -299,7 +304,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                   label.toUpperCase(),
                   style: TextStyle(
                     fontSize: 10,
-                    color: AppColors.textMuted.withOpacity(0.6),
+                    color: AppColors.textMuted.withValues(alpha: 0.6),
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                   ),
@@ -323,7 +328,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
 
   Widget _divider() => Padding(
         padding: const EdgeInsets.only(left: 34),
-        child: Divider(color: AppColors.divider.withOpacity(0.5), height: 1),
+        child: Divider(color: AppColors.divider.withValues(alpha: 0.5), height: 1),
       );
 
   Widget _buildQrCard() {
@@ -332,7 +337,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
 
     Widget qrWidget;
     try {
-      final base64Data = qrImage.contains(',') ? qrImage.split(',')[1] : qrImage;
+      final base64Data =
+          qrImage.contains(',') ? qrImage.split(',')[1] : qrImage;
       qrWidget = ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Image.memory(
@@ -343,7 +349,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         ),
       );
     } catch (e) {
-      qrWidget = const Icon(Icons.qr_code_rounded, size: 120, color: AppColors.primary);
+      qrWidget = const Icon(Icons.qr_code_rounded,
+          size: 120, color: AppColors.primary);
     }
 
     return Container(
@@ -378,7 +385,10 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           const SizedBox(height: 24),
           Text(
             'Keep this QR visible for students',
-            style: TextStyle(fontSize: 13, color: AppColors.textMuted.withOpacity(0.8), fontWeight: FontWeight.w600),
+            style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textMuted.withValues(alpha: 0.8),
+                fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -395,18 +405,27 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.success,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             elevation: 8,
-            shadowColor: AppColors.success.withOpacity(0.4),
+            shadowColor: AppColors.success.withValues(alpha: 0.4),
           ),
           child: _isLoading
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                      color: Colors.white, strokeWidth: 3))
               : const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.play_arrow_rounded, size: 28),
                     SizedBox(width: 12),
-                    Text('ACTIVATE SESSION', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                    Text('ACTIVATE SESSION',
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5)),
                   ],
                 ),
         ),
@@ -420,18 +439,27 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.error,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             elevation: 8,
-            shadowColor: AppColors.error.withOpacity(0.4),
+            shadowColor: AppColors.error.withValues(alpha: 0.4),
           ),
           child: _isLoading
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                      color: Colors.white, strokeWidth: 3))
               : const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.stop_rounded, size: 28),
                     SizedBox(width: 12),
-                    Text('END SESSION', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+                    Text('END SESSION',
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5)),
                   ],
                 ),
         ),
@@ -465,14 +493,18 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.08),
+                  color: AppColors.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '${_attendanceRecords.length} Present',
-                  style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w900),
+                  style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w900),
                 ),
               ),
             ],
@@ -484,7 +516,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
+                child: CircularProgressIndicator(
+                    color: AppColors.primary, strokeWidth: 3),
               ),
             )
           else if (_attendanceRecords.isEmpty)
@@ -493,13 +526,16 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 padding: const EdgeInsets.all(40),
                 child: Column(
                   children: [
-                    Icon(Icons.person_off_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.2)),
+                    Icon(Icons.person_off_rounded,
+                        size: 48, color: AppColors.textMuted.withValues(alpha: 0.2)),
                     const SizedBox(height: 16),
                     Text(
                       _session.isInactive
                           ? 'Activate session to begin.'
                           : 'No check-ins recorded yet.',
-                      style: TextStyle(color: AppColors.textMuted.withOpacity(0.5), fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          color: AppColors.textMuted.withValues(alpha: 0.5),
+                          fontWeight: FontWeight.w600),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -514,21 +550,28 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 4),
               itemBuilder: (ctx, i) {
                 final r = _attendanceRecords[i];
-                final isPresent = r['status'] == 'present';
                 final student = r['student'] ?? {};
-                final name = '${student['first_name'] ?? ''} ${student['last_name'] ?? ''}'.trim();
-                final displayName = name.isNotEmpty ? name : (student['username'] ?? 'Unknown');
-                
+                final name =
+                    '${student['first_name'] ?? ''} ${student['last_name'] ?? ''}'
+                        .trim();
+                final displayName =
+                    name.isNotEmpty ? name : (student['username'] ?? 'Unknown');
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
                       CircleAvatar(
                         radius: 20,
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                         child: Text(
-                          displayName.isNotEmpty ? displayName[0].toUpperCase() : 'S',
-                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 13),
+                          displayName.isNotEmpty
+                              ? displayName[0].toUpperCase()
+                              : 'S',
+                          style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -538,11 +581,19 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                           children: [
                             Text(
                               displayName,
-                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                              style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary),
                             ),
                             Text(
-                              student['student_number'] ?? student['username'] ?? 'ID Unknown',
-                              style: TextStyle(fontSize: 12, color: AppColors.textMuted.withOpacity(0.6), fontWeight: FontWeight.w500),
+                              student['student_number'] ??
+                                  student['username'] ??
+                                  'ID Unknown',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textMuted.withValues(alpha: 0.6),
+                                  fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),
@@ -550,10 +601,11 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: AppColors.success.withOpacity(0.1),
+                          color: AppColors.success.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check_rounded, color: AppColors.success, size: 16),
+                        child: const Icon(Icons.check_rounded,
+                            color: AppColors.success, size: 16),
                       ),
                     ],
                   ),
@@ -565,3 +617,5 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     );
   }
 }
+
+

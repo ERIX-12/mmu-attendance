@@ -44,7 +44,7 @@ class LecturerProfileScreen extends StatelessWidget {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.error.withOpacity(0.1),
+                        color: AppColors.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: TextButton(
@@ -68,7 +68,7 @@ class LecturerProfileScreen extends StatelessWidget {
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.08),
+                color: AppColors.error.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.logout_rounded, color: AppColors.error, size: 18),
@@ -92,7 +92,7 @@ class LecturerProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(32),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
+                    color: AppColors.primary.withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -104,9 +104,9 @@ class LecturerProfileScreen extends StatelessWidget {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 4),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 4),
                     ),
                     child: Center(
                       child: Text(
@@ -135,7 +135,7 @@ class LecturerProfileScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: Text(
@@ -157,7 +157,7 @@ class LecturerProfileScreen extends StatelessWidget {
             Text(
               'MMU Faculty Management System',
               style: TextStyle(
-                color: AppColors.textMuted.withOpacity(0.5),
+                color: AppColors.textMuted.withValues(alpha: 0.5),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -213,7 +213,7 @@ class LecturerProfileScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.06),
+              color: AppColors.primary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: AppColors.primary, size: 20),
@@ -227,7 +227,7 @@ class LecturerProfileScreen extends StatelessWidget {
                   label.toUpperCase(),
                   style: TextStyle(
                     fontSize: 10,
-                    color: AppColors.textMuted.withOpacity(0.6),
+                    color: AppColors.textMuted.withValues(alpha: 0.6),
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                   ),
@@ -253,6 +253,8 @@ class LecturerProfileScreen extends StatelessWidget {
 
   Widget _divider() => Padding(
         padding: const EdgeInsets.only(left: 46),
-        child: Divider(color: AppColors.divider.withOpacity(0.5), height: 1),
+        child: Divider(color: AppColors.divider.withValues(alpha: 0.5), height: 1),
       );
 }
+
+

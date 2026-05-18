@@ -71,7 +71,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
+                color: AppColors.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 20),
@@ -124,7 +124,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -139,14 +139,14 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
             Colors.white,
             Icons.check_circle_rounded,
           ),
-          Container(height: 40, width: 1, color: Colors.white.withOpacity(0.2)),
+          Container(height: 40, width: 1, color: Colors.white.withValues(alpha: 0.2)),
           _summaryChip(
             'Absent',
             '$_absentCount',
             Colors.white,
             Icons.cancel_rounded,
           ),
-          Container(height: 40, width: 1, color: Colors.white.withOpacity(0.2)),
+          Container(height: 40, width: 1, color: Colors.white.withValues(alpha: 0.2)),
           _summaryChip(
             'Total',
             '${_records.length}',
@@ -165,7 +165,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color.withOpacity(0.8), size: 16),
+            Icon(icon, color: color.withValues(alpha: 0.8), size: 16),
             const SizedBox(width: 6),
             Text(
               value,
@@ -183,7 +183,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
           label.toUpperCase(),
           style: TextStyle(
             fontSize: 10,
-            color: color.withOpacity(0.6),
+            color: color.withValues(alpha: 0.6),
             fontWeight: FontWeight.w800,
             letterSpacing: 1,
           ),
@@ -211,7 +211,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               width: 54,
               height: 54,
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.08),
+                color: statusColor.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Icon(
@@ -249,7 +249,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textMuted.withOpacity(0.6)),
+                      Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textMuted.withValues(alpha: 0.6)),
                       const SizedBox(width: 4),
                       Text(
                         record.date,
@@ -260,9 +260,9 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(width: 4, height: 4, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.textMuted.withOpacity(0.3))),
+                      Container(width: 4, height: 4, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.textMuted.withValues(alpha: 0.3))),
                       const SizedBox(width: 8),
-                      Icon(Icons.access_time_rounded, size: 12, color: AppColors.textMuted.withOpacity(0.6)),
+                      Icon(Icons.access_time_rounded, size: 12, color: AppColors.textMuted.withValues(alpha: 0.6)),
                       const SizedBox(width: 4),
                       Text(
                         DateFormat('h:mm a').format(record.timestamp.toLocal()),
@@ -322,3 +322,5 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     );
   }
 }
+
+

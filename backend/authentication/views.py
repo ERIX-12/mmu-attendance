@@ -265,8 +265,13 @@ def register_view(request):
 @permission_classes([AllowAny])
 def reset_password_view(request):
     """
-    Mock forgot password endpoint
+    Reset password and send a special reset code (temporary password) to user's email
     """
+    from django.core.mail import send_mail
+    from django.conf import settings
+    import random
+    import string
+
     email = request.data.get('email')
     username = request.data.get('username')
     
@@ -279,21 +284,71 @@ def reset_password_view(request):
         else:
             user = User.objects.get(username=username)
             
-        temp_password = "Temp@12345"
-        try:
-            if hasattr(user, 'profile') and user.profile.role == 'lecturer':
-                temp_password = "Lecturer@123"
-        except:
-            pass
-            
+        user_email = user.email
+        if not user_email:
+            return Response({'error': 'No email address is associated with this account. Please contact an administrator.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate a secure random 8-character temporary password/reset code
+        chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
+        temp_password = ''.join(random.choice(chars) for _ in range(8))
+        
         user.set_password(temp_password)
         user.save()
         
+        # Email contents
+        subject = 'MMU Attendance - Password Reset Code'
+        email_message = f"""Dear {user.first_name or user.username},
+
+We received a request to reset the password for your MMU Attendance account.
+
+Your special reset code (temporary password) is: {temp_password}
+
+Please log in to the application using this code. Once logged in, you can update your password in your profile settings.
+
+If you did not request a password reset, please secure your account immediately.
+
+Best regards,
+MMU Attendance System Team
+Mountains of the Moon University
+"""
+        
+        email_sent = False
+        try:
+            send_mail(
+                subject,
+                email_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user_email],
+                fail_silently=False,
+            )
+            email_sent = True
+        except Exception as e:
+            # We log it, but don't crash so the process still completes
+            print(f"Error sending email: {e}")
+
+        email_obfuscated = user_email
+        try:
+            parts = user_email.split('@')
+            if len(parts) == 2:
+                name, domain = parts
+                if len(name) > 2:
+                    email_obfuscated = f"{name[:2]}***@{domain}"
+                else:
+                    email_obfuscated = f"*@{domain}"
+        except:
+            pass
+
+        msg = f"A special reset code has been sent successfully to your email ({email_obfuscated})."
+        if not email_sent:
+            msg = f"Password reset successfully. (Email delivery failed, please see the code below)."
+
         return Response({
-            'message': 'Password has been reset successfully.',
+            'message': msg,
             'temp_password': temp_password,
-            'note': 'In a real production app, this would be sent to your email.'
+            'email_sent': email_sent,
+            'note': 'In production, this is sent securely to your registered email.'
         }, status=status.HTTP_200_OK)
+
     except User.DoesNotExist:
         return Response({'error': 'No account found with these details.'}, status=status.HTTP_404_NOT_FOUND)
 

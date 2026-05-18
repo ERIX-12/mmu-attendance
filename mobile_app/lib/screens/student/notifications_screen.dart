@@ -117,7 +117,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           children: [
             const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 16),
-            Text('Failed to load notifications', style: TextStyle(color: AppColors.textPrimary.withOpacity(0.7))),
+            Text('Failed to load notifications', style: TextStyle(color: AppColors.textPrimary.withValues(alpha: 0.7))),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadNotifications,
@@ -134,9 +134,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.notifications_off_outlined, size: 64, color: AppColors.textMuted.withOpacity(0.5)),
+            Icon(Icons.notifications_off_outlined, size: 64, color: AppColors.textMuted.withValues(alpha: 0.5)),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'No notifications',
               style: TextStyle(
                 fontSize: 18,
@@ -162,10 +162,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isUnread ? Colors.blue.withOpacity(0.05) : Colors.white,
+              color: isUnread ? Colors.blue.withValues(alpha: 0.05) : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isUnread ? Colors.blue.withOpacity(0.2) : Colors.transparent,
+                color: isUnread ? Colors.blue.withValues(alpha: 0.2) : Colors.transparent,
                 width: 1,
               ),
               boxShadow: AppColors.softShadow,
@@ -176,7 +176,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: isUnread ? Colors.blue.withOpacity(0.1) : AppColors.background,
+                    color: isUnread ? Colors.blue.withValues(alpha: 0.1) : AppColors.background,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -216,7 +216,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       const SizedBox(height: 6),
                       Text(
                         notification.message,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
                           height: 1.4,
@@ -245,3 +245,5 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 }
+
+

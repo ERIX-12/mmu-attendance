@@ -44,7 +44,7 @@ class StudentProfileScreen extends StatelessWidget {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.error.withOpacity(0.1),
+                        color: AppColors.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: TextButton(
@@ -68,7 +68,7 @@ class StudentProfileScreen extends StatelessWidget {
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.08),
+                color: AppColors.error.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.logout_rounded, color: AppColors.error, size: 18),
@@ -92,7 +92,7 @@ class StudentProfileScreen extends StatelessWidget {
                   height: 130,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 8),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.1), width: 8),
                   ),
                 ),
                 Container(
@@ -103,7 +103,7 @@ class StudentProfileScreen extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
+                        color: AppColors.primary.withValues(alpha: 0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -151,7 +151,7 @@ class StudentProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
+                color: AppColors.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Text(
@@ -171,7 +171,7 @@ class StudentProfileScreen extends StatelessWidget {
             Text(
               'MMU Student Attendance System',
               style: TextStyle(
-                color: AppColors.textMuted.withOpacity(0.5),
+                color: AppColors.textMuted.withValues(alpha: 0.5),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -230,7 +230,7 @@ class StudentProfileScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.06),
+              color: AppColors.primary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: AppColors.primary, size: 20),
@@ -244,7 +244,7 @@ class StudentProfileScreen extends StatelessWidget {
                   label.toUpperCase(),
                   style: TextStyle(
                     fontSize: 10,
-                    color: AppColors.textMuted.withOpacity(0.6),
+                    color: AppColors.textMuted.withValues(alpha: 0.6),
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                   ),
@@ -270,6 +270,8 @@ class StudentProfileScreen extends StatelessWidget {
 
   Widget _divider() => Padding(
         padding: const EdgeInsets.only(left: 46),
-        child: Divider(color: AppColors.divider.withOpacity(0.5), height: 1),
+        child: Divider(color: AppColors.divider.withValues(alpha: 0.5), height: 1),
       );
 }
+
+

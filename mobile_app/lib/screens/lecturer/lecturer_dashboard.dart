@@ -5,8 +5,6 @@ import '../../models/course_model.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../utils/constants.dart';
-import '../../widgets/stat_card.dart';
-import '../auth/login_screen.dart';
 import 'lecturer_sessions_screen.dart';
 import 'create_session_screen.dart';
 import 'lecturer_profile_screen.dart';
@@ -52,10 +50,14 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
               elevation: 12,
               icon: const Icon(Icons.add_rounded, size: 28),
               label: const Text(
-                'NEW SESSION', 
-                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 13),
+                'NEW SESSION',
+                style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                    fontSize: 13),
               ),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
             )
           : null,
     );
@@ -69,7 +71,7 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -106,7 +108,9 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
         curve: Curves.fastOutSlowIn,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.08)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(22),
         ),
         child: Row(
@@ -114,7 +118,9 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : AppColors.textMuted.withOpacity(0.6),
+              color: isSelected
+                  ? AppColors.primary
+                  : AppColors.textMuted.withValues(alpha: 0.6),
               size: 24,
             ),
             if (isSelected) ...[
@@ -181,7 +187,6 @@ class _LecturerHomeState extends State<_LecturerHome> {
   }
 
   int get _activeSessions => _sessions.where((s) => s.isActive).length;
-  int get _completedSessions => _sessions.where((s) => s.isCompleted).length;
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +198,8 @@ class _LecturerHomeState extends State<_LecturerHome> {
         color: AppColors.primary,
         displacement: 40,
         child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics()),
           slivers: [
             SliverAppBar(
               expandedHeight: 280,
@@ -218,7 +224,7 @@ class _LecturerHomeState extends State<_LecturerHome> {
                       right: -60,
                       child: CircleAvatar(
                         radius: 140,
-                        backgroundColor: Colors.white.withOpacity(0.05),
+                        backgroundColor: Colors.white.withValues(alpha: 0.05),
                       ),
                     ),
                     SafeArea(
@@ -235,11 +241,14 @@ class _LecturerHomeState extends State<_LecturerHome> {
                                   padding: const EdgeInsets.all(3),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
+                                    border: Border.all(
+                                        color: Colors.white.withValues(alpha: 0.3),
+                                        width: 1.5),
                                   ),
                                   child: CircleAvatar(
                                     radius: 30,
-                                    backgroundColor: Colors.white.withOpacity(0.15),
+                                    backgroundColor:
+                                        Colors.white.withValues(alpha: 0.15),
                                     child: Text(
                                       user?.initials ?? 'L',
                                       style: const TextStyle(
@@ -253,12 +262,13 @@ class _LecturerHomeState extends State<_LecturerHome> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'HELLO,',
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.6),
+                                          color: Colors.white.withValues(alpha: 0.6),
                                           fontSize: 12,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: 2,
@@ -282,9 +292,11 @@ class _LecturerHomeState extends State<_LecturerHome> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+                                border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.15),
+                                    width: 1),
                               ),
                               child: Row(
                                 children: [
@@ -324,17 +336,19 @@ class _LecturerHomeState extends State<_LecturerHome> {
                         ),
                         TextButton(
                           onPressed: () {},
-                          child: const Text('View All', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                          child: const Text('View All',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w800, fontSize: 13)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     if (_isLoading)
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.all(60),
-                          child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
+                          child: CircularProgressIndicator(
+                              color: AppColors.primary, strokeWidth: 3),
                         ),
                       )
                     else if (_error != null)
@@ -371,13 +385,14 @@ class _LecturerHomeState extends State<_LecturerHome> {
         children: [
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               fontSize: 9,
               fontWeight: FontWeight.w900,
               letterSpacing: 1,
@@ -388,7 +403,8 @@ class _LecturerHomeState extends State<_LecturerHome> {
     );
   }
 
-  Widget _statDivider() => Container(width: 1, height: 30, color: Colors.white.withOpacity(0.1));
+  Widget _statDivider() =>
+      Container(width: 1, height: 30, color: Colors.white.withValues(alpha: 0.1));
 
   Widget _buildSessionCard(AttendanceSessionModel session) {
     Color statusColor;
@@ -434,7 +450,7 @@ class _LecturerHomeState extends State<_LecturerHome> {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.08),
+                    color: statusColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(statusIcon, color: statusColor, size: 28),
@@ -449,13 +465,15 @@ class _LecturerHomeState extends State<_LecturerHome> {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.textMuted.withOpacity(0.6),
+                          color: AppColors.textMuted.withValues(alpha: 0.6),
                           letterSpacing: 1,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        session.title.isNotEmpty ? session.title : 'Attendance Session',
+                        session.title.isNotEmpty
+                            ? session.title
+                            : 'Attendance Session',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -469,7 +487,8 @@ class _LecturerHomeState extends State<_LecturerHome> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 20),
+                const Icon(Icons.chevron_right_rounded,
+                    color: AppColors.textMuted, size: 20),
               ],
             ),
           ),
@@ -491,19 +510,26 @@ class _LecturerHomeState extends State<_LecturerHome> {
                 shape: BoxShape.circle,
                 boxShadow: AppColors.softShadow,
               ),
-              child: Icon(Icons.event_note_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
+              child: Icon(Icons.event_note_rounded,
+                  size: 48, color: AppColors.textMuted.withValues(alpha: 0.3)),
             ),
             const SizedBox(height: 24),
             const Text(
               'No active sessions found.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800),
+              style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Text(
               'Create your first attendance session using the plus button.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: AppColors.textMuted.withValues(alpha: 0.7),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -524,7 +550,8 @@ class _LecturerHomeState extends State<_LecturerHome> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ],
@@ -532,3 +559,5 @@ class _LecturerHomeState extends State<_LecturerHome> {
     );
   }
 }
+
+

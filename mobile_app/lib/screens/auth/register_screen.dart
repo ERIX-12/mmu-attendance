@@ -176,7 +176,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 200,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -188,7 +188,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 250,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.04),
+                  color: Colors.white.withValues(alpha: 0.04),
                 ),
               ),
             ),
@@ -203,9 +203,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
+                        color: Colors.white.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
                       ),
                       child: const Icon(
                         Icons.person_add_alt_1_rounded,
@@ -217,7 +217,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Text(
                       'Join MMU Attendance',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.5,
@@ -244,7 +244,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 40,
             offset: const Offset(0, 15),
           ),
@@ -262,19 +262,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: AppColors.error.withOpacity(0.1),
+                  color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.error.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline,
+                    const Icon(Icons.error_outline,
                         color: AppColors.error, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _errorMessage!,
-                        style: TextStyle(color: AppColors.error, fontSize: 13),
+                        style: const TextStyle(color: AppColors.error, fontSize: 13),
                       ),
                     ),
                   ],
@@ -436,7 +436,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   elevation: 8,
-                  shadowColor: AppColors.primary.withOpacity(0.3),
+                  shadowColor: AppColors.primary.withValues(alpha: 0.3),
                 ),
                 child: _isLoading
                     ? const SizedBox(
@@ -464,10 +464,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: RichText(
-                  text: TextSpan(
+                  text: const TextSpan(
                     style: TextStyle(
                         fontSize: 13, color: AppColors.textSecondary),
-                    children: const [
+                    children: [
                       TextSpan(text: 'Already have an account? '),
                       TextSpan(
                         text: 'Sign In',
@@ -548,7 +548,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildRoleDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedRole,
+      initialValue: _selectedRole,
       style: const TextStyle(fontSize: 15, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         labelText: 'Register As',
@@ -581,7 +581,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildFacultyDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedFaculty,
+      initialValue: _selectedFaculty,
       isExpanded: true,
       decoration: InputDecoration(
         labelText: 'Faculty',
@@ -590,10 +590,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.divider),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
         filled: true,
-        fillColor: AppColors.background.withOpacity(0.5),
+        fillColor: AppColors.background.withValues(alpha: 0.5),
       ),
       validator: (v) =>
           v == null || v.isEmpty ? 'Please select a faculty' : null,
@@ -620,7 +620,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         : <String>[];
 
     return DropdownButtonFormField<String>(
-      value: _selectedDepartment,
+      initialValue: _selectedDepartment,
       isExpanded: true,
       decoration: InputDecoration(
         labelText: 'Department',
@@ -629,10 +629,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.divider),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
         filled: true,
-        fillColor: AppColors.background.withOpacity(0.5),
+        fillColor: AppColors.background.withValues(alpha: 0.5),
       ),
       validator: (v) =>
           v == null || v.isEmpty ? 'Please select a department' : null,
@@ -647,7 +647,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildYearOfStudyDropdown() {
     return DropdownButtonFormField<int>(
-      value: _selectedYearOfStudy,
+      initialValue: _selectedYearOfStudy,
       decoration: InputDecoration(
         labelText: 'Year of Study',
         prefixIcon: const Icon(Icons.calendar_today_outlined,
@@ -655,10 +655,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.divider),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
         filled: true,
-        fillColor: AppColors.background.withOpacity(0.5),
+        fillColor: AppColors.background.withValues(alpha: 0.5),
       ),
       validator: (v) =>
           _selectedRole == 'student' && v == null ? 'Required' : null,
@@ -669,3 +669,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
+
+

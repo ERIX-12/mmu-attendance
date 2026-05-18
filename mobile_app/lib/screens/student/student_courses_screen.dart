@@ -149,7 +149,7 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
                     style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                     decoration: InputDecoration(
                       hintText: 'Search courses or codes...',
-                      hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5), fontSize: 15, fontWeight: FontWeight.w600),
+                      hintStyle: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.5), fontSize: 15, fontWeight: FontWeight.w600),
                       prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary, size: 20),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -164,7 +164,7 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4)),
                   ],
                 ),
                 child: TabBar(
@@ -217,7 +217,7 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
                   shape: BoxShape.circle,
                   boxShadow: AppColors.softShadow,
                 ),
-                child: Icon(Icons.search_off_rounded, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
+                child: Icon(Icons.search_off_rounded, size: 48, color: AppColors.textMuted.withValues(alpha: 0.3)),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -229,7 +229,7 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
               Text(
                 'Try searching for something else or refresh the list.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontWeight: FontWeight.w600),
+                style: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.7), fontSize: 13, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -268,7 +268,7 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
+                    color: AppColors.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -295,7 +295,7 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textMuted.withOpacity(0.8),
+                        color: AppColors.textMuted.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -319,7 +319,7 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
                   course.description!,
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textMuted.withOpacity(0.9),
+                    color: AppColors.textMuted.withValues(alpha: 0.9),
                     height: 1.5,
                     fontWeight: FontWeight.w500,
                   ),
@@ -335,14 +335,14 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.business_rounded, size: 16, color: AppColors.textMuted.withOpacity(0.4)),
+                        Icon(Icons.business_rounded, size: 16, color: AppColors.textMuted.withValues(alpha: 0.4)),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             course.department!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 12, color: AppColors.textMuted.withOpacity(0.7), fontWeight: FontWeight.w700),
+                            style: TextStyle(fontSize: 12, color: AppColors.textMuted.withValues(alpha: 0.7), fontWeight: FontWeight.w700),
                           ),
                         ),
                       ],
@@ -361,11 +361,11 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
                       backgroundColor: isEnrolled ? Colors.white : AppColors.primary,
                       foregroundColor: isEnrolled ? AppColors.error : Colors.white,
                       elevation: isEnrolled ? 0 : 4,
-                      shadowColor: AppColors.primary.withOpacity(0.3),
+                      shadowColor: AppColors.primary.withValues(alpha: 0.3),
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
-                        side: isEnrolled ? BorderSide(color: AppColors.error.withOpacity(0.2), width: 1.5) : BorderSide.none,
+                        side: isEnrolled ? BorderSide(color: AppColors.error.withValues(alpha: 0.2), width: 1.5) : BorderSide.none,
                       ),
                     ),
                     child: isLoadingThis
@@ -413,3 +413,5 @@ class _StudentCoursesScreenState extends State<StudentCoursesScreen>
     );
   }
 }
+
+

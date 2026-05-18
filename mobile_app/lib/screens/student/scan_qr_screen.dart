@@ -102,7 +102,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
@@ -117,7 +117,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -153,9 +153,9 @@ class _ScanQrScreenState extends State<ScanQrScreen>
           // Glassmorphic Loading indicator
           if (_isProcessing)
             Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               child: BackdropFilter(
-                filter: ColorFilter.mode(Colors.black.withOpacity(0.2), BlendMode.darken),
+                filter: ColorFilter.mode(Colors.black.withValues(alpha: 0.2), BlendMode.darken),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -168,7 +168,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                       Text(
                         'Verifying Status...',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.5,
@@ -199,7 +199,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                 Text(
                   'SCAN ATTENDANCE',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 3,
@@ -212,7 +212,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                   width: 280,
                   height: 280,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
                     borderRadius: BorderRadius.circular(40),
                   ),
                   child: Stack(
@@ -230,9 +230,9 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   margin: const EdgeInsets.symmetric(horizontal: 40),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -240,7 +240,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.2),
+                          color: AppColors.primary.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.lightbulb_rounded, color: AppColors.primary, size: 16),
@@ -272,7 +272,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
     const size = 42.0;
     const thickness = 6.0;
     const color = AppColors.primary;
-    final radius = Radius.circular(30);
+    const radius = Radius.circular(30);
 
     return [
       // Top-left
@@ -282,7 +282,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: size,
           height: thickness,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: color,
             borderRadius: BorderRadius.only(topLeft: radius),
           ),
@@ -294,7 +294,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: thickness,
           height: size,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: color,
             borderRadius: BorderRadius.only(topLeft: radius),
           ),
@@ -307,7 +307,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: size,
           height: thickness,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: color,
             borderRadius: BorderRadius.only(topRight: radius),
           ),
@@ -319,7 +319,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: thickness,
           height: size,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: color,
             borderRadius: BorderRadius.only(topRight: radius),
           ),
@@ -332,7 +332,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: size,
           height: thickness,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: color,
             borderRadius: BorderRadius.only(bottomLeft: radius),
           ),
@@ -344,7 +344,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: thickness,
           height: size,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: color,
             borderRadius: BorderRadius.only(bottomLeft: radius),
           ),
@@ -357,7 +357,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: size,
           height: thickness,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: color,
             borderRadius: BorderRadius.only(bottomRight: radius),
           ),
@@ -369,7 +369,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
         child: Container(
           width: thickness,
           height: size,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: color,
             borderRadius: BorderRadius.only(bottomRight: radius),
           ),
@@ -382,7 +382,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
     final statusColor = _isSuccess ? AppColors.success : AppColors.error;
     
     return Container(
-      color: Colors.black.withOpacity(0.9),
+      color: Colors.black.withValues(alpha: 0.9),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -398,7 +398,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                     height: 140,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                     ),
                   ),
                   Container(
@@ -406,7 +406,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                     height: 110,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: statusColor.withOpacity(0.2),
+                      color: statusColor.withValues(alpha: 0.2),
                     ),
                   ),
                   Container(
@@ -417,7 +417,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                       color: statusColor,
                       boxShadow: [
                         BoxShadow(
-                          color: statusColor.withOpacity(0.4),
+                          color: statusColor.withValues(alpha: 0.4),
                           blurRadius: 20,
                           spreadRadius: 5,
                         ),
@@ -447,7 +447,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
                   height: 1.6,
                 ),
@@ -467,7 +467,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                       borderRadius: BorderRadius.circular(20),
                     ),
                     elevation: 10,
-                    shadowColor: (_isSuccess ? AppColors.success : AppColors.primary).withOpacity(0.4),
+                    shadowColor: (_isSuccess ? AppColors.success : AppColors.primary).withValues(alpha: 0.4),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -493,7 +493,7 @@ class _ScanQrScreenState extends State<ScanQrScreen>
                   child: Text(
                     'Cancel and Exit',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -506,3 +506,5 @@ class _ScanQrScreenState extends State<ScanQrScreen>
     );
   }
 }
+
+

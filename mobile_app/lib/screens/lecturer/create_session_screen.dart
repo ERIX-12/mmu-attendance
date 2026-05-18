@@ -236,7 +236,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               elevation: 10,
-                              shadowColor: AppColors.primary.withOpacity(0.4),
+                              shadowColor: AppColors.primary.withValues(alpha: 0.4),
                             ),
                             child: _isLoading
                                 ? const SizedBox(
@@ -270,7 +270,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w900,
-          color: AppColors.textMuted.withOpacity(0.7),
+          color: AppColors.textMuted.withValues(alpha: 0.7),
           letterSpacing: 2,
         ),
       ),
@@ -285,7 +285,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
         boxShadow: AppColors.softShadow,
       ),
       child: DropdownButtonFormField<CourseModel>(
-        value: _selectedCourse,
+        initialValue: _selectedCourse,
         style: const TextStyle(fontSize: 15, color: AppColors.textPrimary, fontWeight: FontWeight.w700),
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.class_rounded, color: AppColors.primary, size: 22),
@@ -366,7 +366,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.08),
+                      color: AppColors.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.calendar_month_rounded, color: AppColors.primary, size: 20),
@@ -402,7 +402,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.background.withOpacity(0.5),
+                      color: AppColors.background.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
@@ -438,7 +438,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.background.withOpacity(0.5),
+                      color: AppColors.background.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
@@ -473,3 +473,5 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
     );
   }
 }
+
+
