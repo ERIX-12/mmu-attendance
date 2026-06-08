@@ -9,8 +9,8 @@ services:
     name: mmu-attendance-backend
     env: python
     rootDir: backend
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python create_demo_users.py"
-    startCommand: "gunicorn mmu_attendance.wsgi:application"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    startCommand: "python manage.py migrate && python create_demo_users.py && gunicorn mmu_attendance.wsgi:application"
     plan: free
     envVars:
       - key: DATABASE_URL
