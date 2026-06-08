@@ -196,16 +196,18 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # Allow all origins in development
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins to make integration seamless
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://localhost:\d+$",
     r"^http://127\.0\.0\.1:\d+$",
+    r"^https://.*\.vercel\.app$",
 ]
 
 if not DEBUG:
     CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split()
     CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split()
+    CSRF_TRUSTED_ORIGINS.append("https://*.vercel.app")
 else:
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000",
@@ -216,6 +218,7 @@ else:
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://*.vercel.app",
     ]
 
 # Production settings overrides
